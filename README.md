@@ -64,7 +64,10 @@ timetag/
 - **Orders:** filter by status, search, open an order to see the customer and address, change status
   (Pending → Confirmed → Shipped → Delivered, or Cancelled — cancelling puts the stock back), call or
   WhatsApp the customer, export to CSV.
-- **Inventory:** change price and stock, hide or show a watch in the store.
+- **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, price, stock,
+  collection, description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
+  choose; first photo is the main one; reorder or remove). Photos are resized automatically. **Edit** any
+  watch (including the built-in ones) to add photos or change its text; watches you added can be deleted.
 - The password itself is not in the code — only its SHA-256 fingerprint (see `src/lib/auth.js` for how to change it).
 
 > ⚠️ **Demo storage.** There is no server yet, so orders, stock and the admin login all live in the
@@ -82,7 +85,7 @@ timetag/
 - **Mobile menu**, sticky header, scroll fade-in animations, hover effects
 - Responsive down to phone width; respects "reduce motion" settings
 
-## Adding real product photos
+## Adding products in code (alternative to the admin)
 
 The watches are drawn in code until you have photography. To use a photo:
 
