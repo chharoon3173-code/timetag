@@ -1,4 +1,4 @@
-import { FacebookIcon, InstagramIcon, Logo, TikTokIcon, YouTubeIcon } from './Icons.jsx';
+import { BrandLockup, FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from './Icons.jsx';
 import './Footer.css';
 
 const COLUMNS = [
@@ -23,8 +23,7 @@ export default function Footer() {
         <div className="footer__grid">
           <div className="footer__brand">
             <a href="#top" className="brand" aria-label="TimeTag home">
-              <Logo />
-              <span className="brand__word">TIMETAG</span>
+              <BrandLockup lionHeight={96} wordWidth={170} stacked />
             </a>
             <p className="footer__statement">
               Timepieces chosen for character — made to be worn, kept and remembered.

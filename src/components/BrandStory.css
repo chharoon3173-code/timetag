@@ -5,15 +5,13 @@
 }
 .story__monogram {
   position: absolute;
-  right: -2%;
+  right: -4%;
   top: 50%;
+  width: clamp(260px, 34vw, 500px);
+  height: auto;
   transform: translateY(-50%);
-  font-family: var(--font-serif);
-  font-size: clamp(220px, 28vw, 440px);
-  font-weight: 200;
-  line-height: 0.8;
-  letter-spacing: -0.08em;
-  color: rgba(201, 169, 110, 0.05);
+  opacity: 0.06;
+  filter: grayscale(0.3);
   pointer-events: none;
 }
 .story__grid {

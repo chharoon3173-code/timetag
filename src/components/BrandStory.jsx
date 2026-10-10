@@ -9,7 +9,7 @@ export default function BrandStory() {
   return (
     <section className="story section" id="story" aria-labelledby="story-title">
       <Grain />
-      <div className="story__monogram" aria-hidden="true">TT</div>
+      <img className="story__monogram" src="brand/lion.png" alt="" aria-hidden="true" />
       <div className="container story__grid">
         <Reveal className="box" aria-hidden="true">
           <div className="box__lid">

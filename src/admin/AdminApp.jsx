@@ -40,7 +40,7 @@ export default function AdminApp() {
     <div className="adm">
       <aside className="adm-side">
         <div className="adm-brand">
-          <span className="adm-mono">TT</span>
+          <span className="adm-mono"><img src="brand/lion.png" alt="" /></span>
           <div><strong>TIMETAG</strong><small>Admin</small></div>
         </div>
         <nav className="adm-nav" aria-label="Admin">

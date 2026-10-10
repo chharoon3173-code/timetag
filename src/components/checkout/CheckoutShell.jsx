@@ -8,13 +8,8 @@ import './Checkout.css';
 export function CheckoutLogo() {
   return (
     <a href={href('/')} className="co-logo" aria-label="TimeTag — back to store">
-      <svg width="44" height="44" viewBox="0 0 46 46" aria-hidden="true">
-        <circle cx="23" cy="23" r="22" fill="#141210" />
-        <circle cx="23" cy="23" r="18.5" fill="none" stroke="#C9A96E" strokeWidth="0.6" />
-        <text x="18.5" y="28.6" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="16" fill="#F4EFE6" fontWeight="500">T</text>
-        <text x="27" y="28.6" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="16" fill="#C9A96E" fontStyle="italic">T</text>
-      </svg>
-      <span>TIMETAG</span>
+      <span className="co-logo__badge"><img src="brand/lion.png" alt="" height="48" width="33" /></span>
+      <img src="brand/wordmark.png" alt="TimeTag" className="co-logo__word" width="110" height="20" />
     </a>
   );
 }

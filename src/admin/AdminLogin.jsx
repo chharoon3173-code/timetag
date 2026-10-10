@@ -29,7 +29,7 @@ export default function AdminLogin({ onSuccess }) {
     <div className="adm-login">
       <form className="adm-login__card" onSubmit={submit} noValidate>
         <div className="adm-login__brand">
-          <span className="adm-mono adm-mono--lg">TT</span>
+          <span className="adm-mono adm-mono--lg"><img src="brand/lion.png" alt="" /></span>
           <h1>TimeTag Admin</h1>
           <p>Sign in to manage orders and inventory.</p>
         </div>

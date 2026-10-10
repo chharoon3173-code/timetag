@@ -38,13 +38,33 @@ export function Stars({ rating = 5, className = '' }) {
   );
 }
 
-export function Logo({ size = 46 }) {
+// Brand assets live in /public/brand. Relative paths work in dev, Vite builds and GitHub Pages.
+export const LION_SRC = 'brand/lion.png';
+export const WORDMARK_SRC = 'brand/wordmark.png';
+
+/** Crowned-lion emblem. */
+export function Logo({ height = 52, className = '' }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 46 46" aria-hidden="true" focusable="false">
-      <circle cx="23" cy="23" r="22" fill="none" stroke="#C9A96E" strokeWidth="0.8" />
-      <circle cx="23" cy="23" r="18.5" fill="none" stroke="#C9A96E" strokeWidth="0.4" opacity="0.6" />
-      <text x="18.5" y="28.6" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="16" fill="#F4EFE6" fontWeight="500">T</text>
-      <text x="27" y="28.6" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="16" fill="#C9A96E" fontStyle="italic">T</text>
-    </svg>
+    <img
+      src={LION_SRC}
+      alt=""
+      height={height}
+      width={Math.round(height * 0.696)}
+      className={`logo-lion ${className}`}
+      style={{ height: `var(--lion-h, ${height}px)`, width: 'auto' }}
+    />
+  );
+}
+
+/** Lion + "TIME TAG" wordmark, as used in the header and footer. */
+export function BrandLockup({ lionHeight = 52, wordWidth = 150, stacked = false, className = '' }) {
+  return (
+    <span
+      className={`brand-lockup${stacked ? ' brand-lockup--stacked' : ''} ${className}`}
+      style={{ '--lion-h': `${lionHeight}px`, '--word-w': `${wordWidth}px` }}
+    >
+      <Logo height={lionHeight} />
+      <img src={WORDMARK_SRC} alt="TimeTag" width={wordWidth} height={Math.round(wordWidth * 0.18)} className="logo-wordmark" />
+    </span>
   );
 }

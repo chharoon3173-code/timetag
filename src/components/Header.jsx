@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BagIcon, CloseIcon, HeartIcon, Logo, MenuIcon, SearchIcon, UserIcon } from './Icons.jsx';
+import { BagIcon, BrandLockup, CloseIcon, HeartIcon, MenuIcon, SearchIcon, UserIcon } from './Icons.jsx';
 import './Header.css';
 
 const NAV = [
@@ -33,8 +33,7 @@ export default function Header({ wishlistCount = 0, bagCount = 0, onBagClick }) 
       <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
         <div className="container site-header__inner">
           <a href="#top" className="brand" aria-label="TimeTag home">
-            <Logo />
-            <span className="brand__word">TIMETAG</span>
+            <BrandLockup lionHeight={54} wordWidth={140} />
           </a>
 
           <nav className="main-nav" aria-label="Main">

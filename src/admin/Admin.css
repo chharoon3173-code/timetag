@@ -21,7 +21,9 @@
   border: 1px solid var(--gold); border-radius: 50%;
   color: var(--gold); font-size: 14px; font-weight: 500; letter-spacing: 0.04em;
 }
-.adm-mono--lg { width: 56px; height: 56px; font-size: 18px; }
+.adm-mono--lg { width: 88px; height: 88px; }
+.adm-mono { background: #050505; overflow: hidden; }
+.adm-mono img { width: 72%; height: auto; }
 
 /* sidebar */
 .adm-side {

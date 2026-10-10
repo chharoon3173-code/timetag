@@ -16,18 +16,26 @@
 /* header */
 .co-header { border-bottom: 1px solid var(--co-line); background: #fff; }
 .co-header__in {
-  position: relative; max-width: 1200px; margin: 0 auto; height: 108px;
+  position: relative; max-width: 1200px; margin: 0 auto; height: 124px;
   display: flex; align-items: center; justify-content: center; padding: 0 20px;
 }
 .co-logo { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; color: var(--co-text); text-decoration: none; }
-.co-logo span { font-size: 11px; font-weight: 500; letter-spacing: 0.42em; padding-left: 0.42em; }
+.co-logo__badge {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 40%, #1d1a16 0%, #050505 75%);
+  box-shadow: 0 0 0 1px rgba(201, 169, 110, 0.5);
+}
+.co-logo__badge img { height: 48px; width: auto; }
+/* gold wordmark darkened slightly so it reads on white */
+.co-logo__word { width: 110px; height: auto; filter: brightness(0.72) saturate(1.2); }
 .co-secure {
   position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
   display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--co-mute);
 }
 
 /* layout */
-.co-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: calc(100vh - 109px); }
+.co-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: calc(100vh - 125px); }
 .co-main { display: flex; justify-content: flex-end; padding: 44px clamp(20px, 4vw, 64px) 64px; }
 .co-main > * { width: min(560px, 100%); }
 .co-side { background: var(--co-side); border-left: 1px solid var(--co-line); }
@@ -152,7 +160,9 @@
 
 /* mobile */
 @media (max-width: 1000px) {
-  .co-header__in { height: 84px; }
+  .co-header__in { height: 104px; }
+  .co-logo__badge { width: 54px; height: 54px; }
+  .co-logo__badge img { height: 40px; }
   .co-secure { display: none; }
   .co-body { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .co-summary-toggle {
