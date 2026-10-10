@@ -1,11 +1,24 @@
 import { useId } from 'react';
+import { usePktStart } from '../lib/clock.js';
 
 /**
  * Vector watch render used until real product photography is added.
  * `style` is one of WATCH_STYLES from data/products.js.
  */
+/** CSS variables for a hand that turns once every `period` seconds, starting at the current PKT time. */
+function handVars(start, period) {
+  const elapsed = start % period;
+  return {
+    '--dur': `${period}s`,
+    '--delay': `-${elapsed.toFixed(3)}s`,
+    // shown as-is if animations are unavailable, so the time is still right on load
+    transform: `rotate(${((elapsed / period) * 360).toFixed(3)}deg)`,
+  };
+}
+
 export default function Watch({ style, className = '' }) {
   const uid = useId().replace(/:/g, '');
+  const start = usePktStart();
   const s = style;
   const id = (name) => `${name}-${uid}`;
   const url = (name) => `url(#${id(name)})`;
@@ -100,10 +113,18 @@ export default function Watch({ style, className = '' }) {
         <text x="120" y="222" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="4.6" letterSpacing="1.8" fill={s.hands}>AUTOMATIC</text>
       )}
 
-      {/* hands at 10:10 */}
-      <path d="M116.6 184 L120 134 L123.4 184 Z" fill={s.hands} transform="rotate(-58 120 180)" />
-      <path d="M118 186 L120 121 L122 186 Z" fill={s.hands} transform="rotate(62 120 180)" />
-      <line className="watch-seconds" x1="120" y1="198" x2="120" y2="122" stroke={s.accent} strokeWidth="1" />
+      {/* live hands — Pakistan Standard Time. key={start} restarts the animations cleanly on re-sync. */}
+      <g key={start}>
+      <g className="watch-hand" style={handVars(start, 43200)}>
+        <path d="M116.6 184 L120 134 L123.4 184 Z" fill={s.hands} />
+      </g>
+      <g className="watch-hand" style={handVars(start, 3600)}>
+        <path d="M118 186 L120 121 L122 186 Z" fill={s.hands} />
+      </g>
+      <g className="watch-hand" style={handVars(start, 60)}>
+        <line x1="120" y1="198" x2="120" y2="122" stroke={s.accent} strokeWidth="1" />
+      </g>
+      </g>
       <circle cx="120" cy="180" r="4.6" fill={s.hands} />
       <circle cx="120" cy="180" r="1.8" fill={s.accent} />
 

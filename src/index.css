@@ -289,11 +289,13 @@ a {
   height: auto;
   overflow: visible;
 }
-.watch-seconds {
+.watch-hand {
+  transform-box: view-box;
   transform-origin: 120px 180px;
-  animation: sweep 60s linear infinite;
+  animation: watch-turn var(--dur) linear var(--delay) infinite;
 }
-@keyframes sweep {
+@keyframes watch-turn {
+  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 .product-photo {
@@ -335,6 +337,10 @@ a {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+  /* watch hands still tell the real time */
+  .watch-hand {
+    animation: watch-turn var(--dur) linear var(--delay) infinite !important;
   }
 }
 
