@@ -208,13 +208,42 @@
   color: var(--ink);
 }
 
+/* swipeable row on tablets & phones — all four watches become equal slides */
 @media (max-width: 920px) {
-  .edit__grid { grid-template-columns: minmax(0, 1fr); }
-  .pcard--featured { min-height: 620px; }
-}
-@media (max-width: 560px) {
-  .pcard--compact { grid-template-columns: 120px minmax(0, 1fr); min-height: 200px; }
-  .pcard__name { font-size: 18px; }
+  .edit__grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+  }
+  .edit__stack { display: contents; }
+  .pcard {
+    flex: 0 0 min(78%, 340px);
+    scroll-snap-align: start;
+  }
+  .pcard--featured {
+    min-height: 0;
+    padding: 24px;
+  }
+  .pcard__visual--featured { padding: 10px 0 20px; min-height: 280px; }
+  .pcard__visual--featured > * { width: min(200px, 66%); }
+  .pcard__name--lg { font-size: 24px; }
+  .pcard__desc { font-size: 14px; }
+  .pcard__price--lg { font-size: 20px; }
+  .pcard__row { margin-top: 16px; padding-top: 16px; }
+  .pcard--featured .pcard__btn { min-height: 44px; padding: 0 18px; font-size: 11px; }
+
+  /* the three smaller cards turn into tall cards that match the first one */
+  .pcard--compact {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .pcard__visual--compact { flex: 1; min-height: 300px; }
+  .pcard__visual--compact > * { width: min(170px, 58%); }
+  .pcard__visual--compact > .product-photo { width: 100%; }
+  .pcard__info--compact { padding: 20px 24px 24px; }
 }
 
 .pcard__name a { color: inherit; text-decoration: none; }

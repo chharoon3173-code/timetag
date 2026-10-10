@@ -284,7 +284,8 @@ a {
   100% { transform: scale(1); }
 }
 
-.watch-svg {
+/* :where() keeps this default weak, so each section's own size for the watch wins */
+:where(.watch-svg) {
   width: 100%;
   height: auto;
   overflow: visible;
@@ -391,3 +392,17 @@ a {
 .cart__thumb, .co-thumb, .adm-thumb { overflow: hidden; }
 .co-thumb { overflow: visible; }
 .co-thumb > .product-photo { border-radius: 7px; }
+
+/* Thin gold scrollbars for the swipeable product rows */
+.collections,
+.edit__grid,
+.arrivals {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 110, 0.55) transparent;
+}
+.collections::-webkit-scrollbar,
+.edit__grid::-webkit-scrollbar,
+.arrivals::-webkit-scrollbar { height: 4px; }
+.collections::-webkit-scrollbar-thumb,
+.edit__grid::-webkit-scrollbar-thumb,
+.arrivals::-webkit-scrollbar-thumb { background: rgba(201, 169, 110, 0.55); border-radius: 2px; }

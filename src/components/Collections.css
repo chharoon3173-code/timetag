@@ -95,6 +95,23 @@
   gap: 18px;
 }
 
+/* swipeable row on tablets & phones — same behaviour as "Just In" */
 @media (max-width: 920px) {
-  .collection:nth-child(n) { grid-column: span 12; height: 420px; }
+  .collections {
+    grid-template-columns: repeat(4, 280px);
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+  }
+  .collection:nth-child(n) {
+    grid-column: auto;
+    height: 440px;
+    scroll-snap-align: start;
+  }
+  .collection__watch,
+  .collection--medium .collection__watch {
+    top: 40%;
+    right: -6%;
+    width: min(58%, 250px);
+  }
 }
