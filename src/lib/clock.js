@@ -37,3 +37,14 @@ export function pktTimeString(now = Date.now()) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
 }
+
+/** CSS variables for a hand that turns once every `period` seconds, starting at the current PKT time. */
+export function handVars(start, period) {
+  const elapsed = start % period;
+  return {
+    '--dur': `${period}s`,
+    '--delay': `-${elapsed.toFixed(3)}s`,
+    // shown as-is if animations are unavailable, so the time is still right on load
+    transform: `rotate(${((elapsed / period) * 360).toFixed(3)}deg)`,
+  };
+}

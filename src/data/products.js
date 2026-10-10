@@ -156,3 +156,19 @@ export const REVIEWS = [
 ];
 
 export const formatPrice = (amount) => `Rs. ${amount.toLocaleString('en-PK')}`;
+
+/**
+ * Watch shown large in the hero. `image` is a cut-out photo (transparent background) with the
+ * printed hands removed; live hands are drawn on top. `pivot` is the dial centre and `radius`
+ * the dial radius, both in the image's own pixels; `rotation` lines the hands up with the dial.
+ */
+export const HERO_WATCH = {
+  name: 'Rolex Day-Date Just',
+  image: 'images/hero-day-date.webp',
+  width: 760,
+  height: 1150,
+  pivot: [398, 456],
+  radius: 198,
+  // the dial's 12 o'clock is turned this many degrees in the photo (measured from the day & date windows)
+  rotation: -25,
+};
