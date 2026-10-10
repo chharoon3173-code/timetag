@@ -69,8 +69,14 @@
   .trust__track { animation-duration: 30s; }
 }
 
-/* Reduced motion: no auto-slide, swipe/scroll instead */
+/* Always slides automatically — even when the device asks for reduced motion
+   (it's slow, and pauses on hover/focus). Overrides the site-wide reduced-motion rule. */
 @media (prefers-reduced-motion: reduce) {
-  .trust__viewport { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
-  .trust__group[aria-hidden] { display: none; }
+  .trust__track {
+    animation: trust-slide 60s linear infinite !important;
+  }
+  .trust:hover .trust__track,
+  .trust:focus-within .trust__track {
+    animation-play-state: paused !important;
+  }
 }
