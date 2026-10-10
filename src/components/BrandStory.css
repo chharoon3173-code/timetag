@@ -9,9 +9,10 @@
   top: 50%;
   transform: translateY(-50%);
   font-family: var(--font-serif);
-  font-size: clamp(260px, 34vw, 520px);
+  font-size: clamp(220px, 28vw, 440px);
+  font-weight: 200;
   line-height: 0.8;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.08em;
   color: rgba(201, 169, 110, 0.05);
   pointer-events: none;
 }
@@ -28,8 +29,9 @@
 .story__lead {
   margin: 32px 0 44px;
   font-family: var(--font-serif);
-  font-size: clamp(24px, 2.3vw, 32px);
-  line-height: 1.45;
+  font-weight: 300;
+  font-size: clamp(18px, 1.7vw, 23px);
+  line-height: 1.65;
   color: #e2dbcd;
 }
 
@@ -64,8 +66,9 @@
 }
 .box__name {
   font-family: var(--font-serif);
-  font-size: 30px;
-  letter-spacing: 0.24em;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.34em;
   color: #8c6b36;
 }
 .box__line {

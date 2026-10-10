@@ -13,8 +13,9 @@
   --mute-dark: #6e6555;
   --line: rgba(201, 169, 110, 0.26);
 
-  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Jost', 'Helvetica Neue', system-ui, sans-serif;
+  /* Poppins everywhere — both tokens kept so components can still tell display vs body text apart */
+  --font-serif: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
 
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --gutter: clamp(16px, 4vw, 56px);
@@ -137,10 +138,10 @@ a {
 .display {
   margin: 22px 0 0;
   font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(44px, 5.4vw, 76px);
-  line-height: 1;
-  letter-spacing: -0.005em;
+  font-weight: 300;
+  font-size: clamp(36px, 4.4vw, 62px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 .display em {
   font-style: italic;

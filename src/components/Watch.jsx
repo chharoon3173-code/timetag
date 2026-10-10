@@ -93,11 +93,11 @@ export default function Watch({ style, className = '' }) {
         </g>
       )}
 
-      <text x="120" y="150" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="11" letterSpacing="2.6" fill={s.hands} fontWeight="500">TIMETAG</text>
+      <text x="120" y="150" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="9" letterSpacing="2.2" fill={s.hands} fontWeight="500">TIMETAG</text>
       {s.chronograph ? (
-        <text x="120" y="160" textAnchor="middle" fontFamily="Jost, sans-serif" fontSize="4.2" letterSpacing="1.6" fill={s.accent}>CHRONOGRAPH</text>
+        <text x="120" y="160" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="4.2" letterSpacing="1.6" fill={s.accent}>CHRONOGRAPH</text>
       ) : (
-        <text x="120" y="222" textAnchor="middle" fontFamily="Jost, sans-serif" fontSize="4.6" letterSpacing="1.8" fill={s.hands}>AUTOMATIC</text>
+        <text x="120" y="222" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="4.6" letterSpacing="1.8" fill={s.hands}>AUTOMATIC</text>
       )}
 
       {/* hands at 10:10 */}

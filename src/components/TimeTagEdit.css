@@ -149,20 +149,24 @@
   margin: 8px 0 6px;
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: 28px;
-  line-height: 1.1;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 .pcard__name--lg {
   margin: 0 0 10px;
-  font-size: clamp(34px, 3vw, 44px);
-  line-height: 1.05;
+  font-size: clamp(26px, 2.3vw, 34px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 .pcard__desc {
   margin: 0 0 18px;
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 20px;
-  line-height: 1.4;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.6;
   color: #cfc8ba;
 }
 .pcard__row {
@@ -177,12 +181,13 @@
 }
 .pcard__price {
   font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 400;
   color: #e6dfd1;
 }
 .pcard__price--lg {
-  font-size: 32px;
+  font-size: 26px;
+  font-weight: 300;
   color: var(--ivory);
 }
 
@@ -209,5 +214,5 @@
 }
 @media (max-width: 560px) {
   .pcard--compact { grid-template-columns: 120px minmax(0, 1fr); min-height: 200px; }
-  .pcard__name { font-size: 24px; }
+  .pcard__name { font-size: 18px; }
 }

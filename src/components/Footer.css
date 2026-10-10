@@ -14,8 +14,9 @@
   margin: 26px 0 30px;
   font-family: var(--font-serif);
   font-style: italic;
-  font-size: 22px;
-  line-height: 1.45;
+  font-weight: 300;
+  font-size: 17px;
+  line-height: 1.6;
   color: #d9d2c4;
 }
 .footer__social {

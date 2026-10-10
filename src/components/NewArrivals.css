@@ -50,8 +50,9 @@
   margin: 0;
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: 26px;
-  line-height: 1.1;
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 .arrival__name a {
   color: var(--text-dark);
@@ -71,8 +72,8 @@
 }
 .arrival__price {
   font-family: var(--font-serif);
-  font-size: 21px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 400;
   white-space: nowrap;
 }
 

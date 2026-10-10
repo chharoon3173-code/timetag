@@ -43,8 +43,8 @@ export function Logo({ size = 46 }) {
     <svg width={size} height={size} viewBox="0 0 46 46" aria-hidden="true" focusable="false">
       <circle cx="23" cy="23" r="22" fill="none" stroke="#C9A96E" strokeWidth="0.8" />
       <circle cx="23" cy="23" r="18.5" fill="none" stroke="#C9A96E" strokeWidth="0.4" opacity="0.6" />
-      <text x="19.5" y="29.5" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="20" fill="#F4EFE6" fontWeight="500">T</text>
-      <text x="26.5" y="29.5" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="20" fill="#C9A96E" fontStyle="italic">T</text>
+      <text x="18.5" y="28.6" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="16" fill="#F4EFE6" fontWeight="500">T</text>
+      <text x="27" y="28.6" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="16" fill="#C9A96E" fontStyle="italic">T</text>
     </svg>
   );
 }
