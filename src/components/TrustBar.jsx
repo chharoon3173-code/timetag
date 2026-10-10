@@ -8,20 +8,35 @@ const ITEMS = [
   { Icon: LockIcon, title: 'Secure Payments', text: 'Encrypted checkout' },
 ];
 
+function Group({ hidden = false }) {
+  return (
+    <ul className="trust__group" aria-hidden={hidden || undefined}>
+      {ITEMS.map(({ Icon, title, text }) => (
+        <li key={title} className="trust__item">
+          <span className="trust__icon"><Icon size={30} /></span>
+          <span>
+            <span className="trust__title">{title}</span>
+            <span className="trust__text">{text}</span>
+          </span>
+          <span className="trust__sep" aria-hidden="true">◆</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Continuously sliding strip. The list is repeated so the loop is seamless. */
 export default function TrustBar() {
   return (
     <section className="trust" aria-label="Our promise">
-      <ul className="container trust__grid">
-        {ITEMS.map(({ Icon, title, text }) => (
-          <li key={title} className="trust__item">
-            <span className="trust__icon"><Icon /></span>
-            <div>
-              <div className="trust__title">{title}</div>
-              <div className="trust__text">{text}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="trust__viewport">
+        <div className="trust__track">
+          <Group />
+          <Group hidden />
+          <Group hidden />
+          <Group hidden />
+        </div>
+      </div>
     </section>
   );
 }
