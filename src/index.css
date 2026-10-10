@@ -1,0 +1,338 @@
+/* ---------- Design tokens ---------- */
+:root {
+  --ink: #0b0b0c;
+  --char: #141416;
+  --char-2: #1c1c1f;
+  --gold: #c9a96e;
+  --gold-light: #e4cc9a;
+  --gold-deep: #7a5f33;
+  --ivory: #f4efe6;
+  --ivory-2: #eae2d3;
+  --text-dark: #141210;
+  --mute: #a8a297;
+  --mute-dark: #6e6555;
+  --line: rgba(201, 169, 110, 0.26);
+
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Jost', 'Helvetica Neue', system-ui, sans-serif;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --gutter: clamp(16px, 4vw, 56px);
+  --section-pad: clamp(80px, 10vw, 140px);
+  --header-h: 84px;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--ivory);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+a {
+  color: var(--gold);
+}
+
+:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -60px;
+  z-index: 100;
+  background: var(--gold);
+  color: var(--ink);
+  padding: 12px 18px;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Layout helpers ---------- */
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.section {
+  padding: var(--section-pad) 0;
+}
+
+.section--ivory {
+  background: var(--ivory);
+  color: var(--text-dark);
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 56px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.eyebrow::before {
+  content: '';
+  width: 36px;
+  height: 1px;
+  background: currentColor;
+}
+.section--ivory .eyebrow {
+  color: var(--gold-deep);
+}
+
+.display {
+  margin: 22px 0 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(44px, 5.4vw, 76px);
+  line-height: 1;
+  letter-spacing: -0.005em;
+}
+.display em {
+  font-style: italic;
+}
+
+.serif {
+  font-family: var(--font-serif);
+}
+
+/* ---------- Buttons & links ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 34px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.4s, color 0.4s, border-color 0.4s, gap 0.4s;
+}
+.btn:hover {
+  gap: 20px;
+}
+.btn--gold {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+.btn--gold:hover {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+  color: var(--ink);
+}
+.btn--outline {
+  background: transparent;
+  border-color: rgba(244, 239, 230, 0.35);
+  color: var(--ivory);
+}
+.btn--outline:hover {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+.btn--dark {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ivory);
+}
+.btn--dark:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+.btn--small {
+  min-height: 44px;
+  padding: 0 22px;
+  font-size: 11px;
+}
+
+.text-link {
+  display: inline-flex;
+  gap: 10px;
+  padding: 10px 0 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: gap 0.4s, border-color 0.4s, color 0.3s;
+}
+.text-link:hover {
+  gap: 16px;
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+.section--ivory .text-link {
+  color: var(--gold-deep);
+  border-color: rgba(122, 95, 51, 0.35);
+}
+.section--ivory .text-link:hover {
+  color: var(--text-dark);
+  border-color: var(--text-dark);
+}
+
+/* ---------- Shared product bits ---------- */
+.stars {
+  color: var(--gold);
+  font-size: 14px;
+  letter-spacing: 0.2em;
+}
+
+.heart-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(244, 239, 230, 0.15);
+  background: rgba(11, 11, 12, 0.5);
+  color: var(--ivory);
+  cursor: pointer;
+  transition: color 0.35s, border-color 0.35s, transform 0.35s;
+}
+.heart-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.heart-btn.is-active {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.heart-btn.is-active svg {
+  animation: heart-pop 0.45s var(--ease);
+}
+.heart-btn--light {
+  background: rgba(244, 239, 230, 0.75);
+  border-color: rgba(20, 18, 16, 0.12);
+  color: var(--text-dark);
+}
+.heart-btn--light:hover,
+.heart-btn--light.is-active {
+  color: var(--gold-deep);
+  border-color: var(--gold-deep);
+}
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.watch-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.watch-seconds {
+  transform-origin: 120px 180px;
+  animation: sweep 60s linear infinite;
+}
+@keyframes sweep {
+  to { transform: rotate(360deg); }
+}
+.product-photo {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Film grain overlay used on dark sections */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scroll-reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

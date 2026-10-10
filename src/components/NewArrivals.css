@@ -1,0 +1,88 @@
+.arrivals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+.arrival {
+  position: relative;
+}
+.arrival__visual {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 42%, #fbf8f2 0%, #e7dfd0 70%, #dcd2c0 100%);
+  transition: box-shadow 0.6s;
+}
+.arrival:hover .arrival__visual {
+  box-shadow: inset 0 0 0 1px rgba(122, 95, 51, 0.45);
+}
+.arrival__watch {
+  width: 52%;
+  transform: rotate(-10deg);
+  filter: drop-shadow(0 30px 24px rgba(40, 28, 10, 0.35));
+  transition: transform 1s var(--ease);
+}
+.arrival:hover .arrival__watch {
+  transform: rotate(-4deg) scale(1.08);
+}
+.arrival__tag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 7px 10px;
+  background: var(--text-dark);
+  color: var(--ivory);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.arrival__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-top: 20px;
+}
+.arrival__name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.1;
+}
+.arrival__name a {
+  color: var(--text-dark);
+  text-decoration: none;
+  background: linear-gradient(var(--gold-deep), var(--gold-deep)) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.5s var(--ease);
+}
+.arrival:hover .arrival__name a {
+  background-size: 100% 1px;
+}
+.arrival__coll {
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mute-dark);
+}
+.arrival__price {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* swipeable row on tablets & phones */
+@media (max-width: 920px) {
+  .arrivals {
+    grid-template-columns: repeat(4, minmax(240px, 70%));
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+  }
+  .arrival { scroll-snap-align: start; }
+}

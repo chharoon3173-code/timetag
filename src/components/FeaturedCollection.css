@@ -1,0 +1,51 @@
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 680px;
+}
+.feature__media {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse 60% 60% at 45% 50%, #33402f 0%, #121812 45%, #070908 100%);
+}
+/* macro crop: the watch is drawn larger than its frame */
+.feature__watch {
+  position: absolute;
+  left: -10%;
+  top: 50%;
+  width: 150%;
+  transform: translateY(-50%) rotate(-18deg);
+  filter: drop-shadow(0 60px 60px rgba(0, 0, 0, 0.8));
+  transition: transform 2s var(--ease);
+}
+.feature__media:hover .feature__watch {
+  transform: translateY(-50%) rotate(-14deg) scale(1.04);
+}
+.feature__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 40% 50%, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+}
+.feature__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(48px, 7vw, 120px);
+}
+.feature__title {
+  margin-top: 26px;
+}
+.feature__quote {
+  max-width: 440px;
+  margin: 28px 0 44px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(24px, 2.2vw, 30px);
+  line-height: 1.35;
+  color: #4a4339;
+}
+
+@media (max-width: 920px) {
+  .feature { grid-template-columns: minmax(0, 1fr); }
+  .feature__media { min-height: 420px; }
+}
