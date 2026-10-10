@@ -64,7 +64,10 @@ export function BrandLockup({ lionHeight = 52, wordWidth = 150, stacked = false,
       style={{ '--lion-h': `${lionHeight}px`, '--word-w': `${wordWidth}px` }}
     >
       <Logo height={lionHeight} />
-      <img src={WORDMARK_SRC} alt="TimeTag" width={wordWidth} height={Math.round(wordWidth * 0.18)} className="logo-wordmark" />
+      <span className="brand-lockup__text">
+        <img src={WORDMARK_SRC} alt="TimeTag" width={wordWidth} height={Math.round(wordWidth * 0.18)} className="logo-wordmark" />
+        <span className="brand-lockup__since">Since 2023</span>
+      </span>
     </span>
   );
 }
