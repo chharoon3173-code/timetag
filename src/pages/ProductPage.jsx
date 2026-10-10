@@ -16,12 +16,11 @@ const VIEWS = [
   { id: 'detail', label: 'Dial detail' },
 ];
 
-function GalleryImage({ product, view, index }) {
-  // Real photos: set `images: ['/images/a.png', '/images/b.png', ...]` (or a single `image`) in products.js
-  const photo = product.images?.[index] ?? (index === 0 ? product.image : null) ?? product.image;
-  if (photo) return <img src={photo} alt={`${product.name} — ${view.label}`} className="pp-photo" />;
+/** One gallery slide: an uploaded photo, or one of three angles of the drawn watch. */
+function GalleryImage({ product, slide }) {
+  if (slide.photo) return <img src={slide.photo} alt={`${product.name} — ${slide.label}`} className="pp-photo" />;
   return (
-    <div className={`pp-draw pp-draw--${view.id}`}>
+    <div className={`pp-draw pp-draw--${slide.id}`}>
       <Watch style={product.watch} />
     </div>
   );
@@ -32,6 +31,12 @@ export default function ProductPage({ id, wishlist }) {
   const product = products.find((p) => p.id === id);
   const { lines } = useCart();
   const [view, setView] = useState(0);
+  const slides = useMemo(() => {
+    const photos = product?.images || [];
+    return photos.length
+      ? photos.map((photo, i) => ({ id: `photo-${i}`, label: `Photo ${i + 1}`, photo }))
+      : VIEWS;
+  }, [product]);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -85,10 +90,11 @@ export default function ProductPage({ id, wishlist }) {
             <div className="pp-gallery">
               <div className="pp-stage">
                 {product.badge && <span className="pp-badge">{product.badge}</span>}
-                <GalleryImage product={product} view={VIEWS[view]} index={view} />
+                <GalleryImage product={product} slide={slides[Math.min(view, slides.length - 1)]} />
               </div>
-              <div className="pp-thumbs" role="tablist" aria-label="Product images">
-                {VIEWS.map((v, i) => (
+              {slides.length > 1 && (
+              <div className={`pp-thumbs${slides.length > 3 ? ' pp-thumbs--many' : ''}`} role="tablist" aria-label="Product images">
+                {slides.map((v, i) => (
                   <button
                     key={v.id}
                     type="button"
@@ -98,10 +104,11 @@ export default function ProductPage({ id, wishlist }) {
                     className={`pp-thumb${view === i ? ' is-active' : ''}`}
                     onClick={() => setView(i)}
                   >
-                    <GalleryImage product={product} view={v} index={i} />
+                    <GalleryImage product={product} slide={v} />
                   </button>
                 ))}
               </div>
+              )}
             </div>
 
             <div className="pp-info">
@@ -140,7 +147,7 @@ export default function ProductPage({ id, wishlist }) {
                   <summary>Details</summary>
                   <dl className="pp-specs">
                     <div><dt>Collection</dt><dd>{product.collection}</dd></div>
-                    <div><dt>Strap</dt><dd>{product.watch.bracelet ? 'Steel bracelet' : 'Leather strap'}</dd></div>
+                    <div><dt>Strap</dt><dd>{product.strap || (product.watch.bracelet ? 'Steel bracelet' : 'Leather strap')}</dd></div>
                     {(product.specs || []).map(([k, v]) => (
                       <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
                     ))}

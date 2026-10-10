@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ProductVisual } from '../components/Watch.jsx';
-import { LOW_STOCK, resetDemoData, updateProduct } from '../lib/store.js';
+import ProductEditor from './ProductEditor.jsx';
+import { LOW_STOCK, resetDemoData, storageUsed, updateProduct } from '../lib/store.js';
 import { href } from '../lib/router.js';
 import { formatPrice } from './shared.jsx';
 
@@ -54,8 +55,23 @@ function StockControl({ product, onSaved }) {
   );
 }
 
+const STORAGE_LIMIT_MB = 5; // typical browser limit for one website
+
+function StorageMeter() {
+  const mb = storageUsed() / 1024 / 1024;
+  const pct = Math.min(100, (mb / STORAGE_LIMIT_MB) * 100);
+  return (
+    <div className="adm-meter" title="Photos and orders are stored in this browser until a database is connected">
+      <span>Browser storage</span>
+      <div className="adm-meter__bar"><i style={{ width: `${pct}%` }} className={pct > 80 ? 'is-high' : ''} /></div>
+      <small>{mb.toFixed(1)} of ~{STORAGE_LIMIT_MB} MB</small>
+    </div>
+  );
+}
+
 export default function Inventory({ catalog }) {
   const [toast, setToast] = useState('');
+  const [editing, setEditing] = useState(null); // null | 'new' | product id
   const saved = (msg) => {
     setToast(msg);
     clearTimeout(saved.t);
@@ -65,12 +81,14 @@ export default function Inventory({ catalog }) {
   return (
     <>
       <header className="adm-head">
-        <h1>Inventory</h1>
+        <h1>Inventory <span className="adm-count">{catalog.length} watches</span></h1>
+        <div className="adm-head__actions">
+        <button type="button" className="adm-btn adm-btn--gold" onClick={() => setEditing('new')}>+ Add watch</button>
         <button
           type="button"
           className="adm-btn adm-btn--ghost"
           onClick={() => {
-            if (window.confirm('Reset all stock, prices and test orders in this browser back to the defaults?')) {
+            if (window.confirm('Reset everything in this browser? This removes watches you added, test orders, and all stock/price changes.')) {
               resetDemoData();
               saved('Demo data reset');
             }
@@ -78,13 +96,17 @@ export default function Inventory({ catalog }) {
         >
           Reset demo data
         </button>
+        </div>
       </header>
-      <p className="adm-hint">Changes save instantly. Hidden watches disappear from the store but keep their stock. To add a brand-new watch, add it to <code>src/data/products.js</code>.</p>
+      <div className="adm-subbar">
+        <p className="adm-hint">Price, stock and visibility save instantly. Click <strong>Edit</strong> to change photos, name or description.</p>
+        <StorageMeter />
+      </div>
 
       <section className="adm-card adm-card--flush">
         <div className="adm-scroll">
           <table className="adm-table adm-inv">
-            <thead><tr><th>Watch</th><th>Price</th><th>Stock</th><th>Status</th><th>Visible</th></tr></thead>
+            <thead><tr><th>Watch</th><th>Price</th><th>Stock</th><th>Status</th><th>Visible</th><th><span className="sr-only">Edit</span></th></tr></thead>
             <tbody>
               {catalog.map((p) => {
                 const state = p.stock <= 0 ? ['out', 'Sold out'] : p.stock <= LOW_STOCK ? ['low', 'Low stock'] : ['ok', 'In stock'];
@@ -95,7 +117,7 @@ export default function Inventory({ catalog }) {
                         <span className="adm-thumb"><ProductVisual product={p} /></span>
                         <span>
                           <a href={href(`/product/${p.id}`)} target="_blank" rel="noreferrer">{p.name}</a>
-                          <small>{p.collection}</small>
+                          <small>{p.collection}{p.custom && ' · added by you'}{p.images.length > 0 && ` · ${p.images.length} photo${p.images.length > 1 ? 's' : ''}`}</small>
                         </span>
                       </div>
                     </td>
@@ -116,6 +138,7 @@ export default function Inventory({ catalog }) {
                         <em className="sr-only">Show {p.name} in store</em>
                       </label>
                     </td>
+                    <td><button type="button" className="adm-btn adm-btn--sm" onClick={() => setEditing(p.id)}>Edit</button></td>
                   </tr>
                 );
               })}
@@ -123,6 +146,16 @@ export default function Inventory({ catalog }) {
           </table>
         </div>
       </section>
+
+      {catalog.length === 0 && <p className="adm-empty">No watches yet — click “Add watch”.</p>}
+
+      {editing && (
+        <ProductEditor
+          product={editing === 'new' ? null : catalog.find((p) => p.id === editing)}
+          onClose={() => setEditing(null)}
+          onSaved={saved}
+        />
+      )}
 
       <div className={`adm-toast${toast ? ' is-on' : ''}`} role="status" aria-live="polite">{toast}</div>
     </>

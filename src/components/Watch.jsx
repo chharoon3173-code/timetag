@@ -114,10 +114,11 @@ export default function Watch({ style, className = '' }) {
   );
 }
 
-/** Shows the product photo if one is set, otherwise the vector watch. */
+/** Shows the product's main photo if it has one, otherwise the vector watch. */
 export function ProductVisual({ product, className = '' }) {
-  if (product.image) {
-    return <img className={`product-photo ${className}`} src={product.image} alt={product.name} loading="lazy" />;
+  const photo = product.images?.[0] || product.image;
+  if (photo) {
+    return <img className={`product-photo ${className}`} src={photo} alt={product.name} loading="lazy" decoding="async" />;
   }
   return <Watch style={product.watch} className={className} />;
 }

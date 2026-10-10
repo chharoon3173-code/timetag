@@ -7,9 +7,10 @@
  *     The rest of the app only talks to this file, so nothing else needs to change.
  */
 import { useMemo, useSyncExternalStore } from 'react';
-import { PRODUCTS } from '../data/products.js';
+import { PRODUCTS, WATCH_STYLES } from '../data/products.js';
 
 const KEYS = {
+  products: 'timetag:products', // watches added from the admin panel
   inventory: 'timetag:inventory',
   orders: 'timetag:orders',
   cart: 'timetag:cart',
@@ -49,17 +50,41 @@ function write(key, value) {
 
 /* ---------------- tiny external store ---------------- */
 let state = {
-  inventory: read(KEYS.inventory, {}), // { [productId]: { stock, price, active } }
+  products: read(KEYS.products, []), // watches added in the admin
+  inventory: read(KEYS.inventory, {}), // { [productId]: { stock, price, active, images, ...edits } }
   orders: read(KEYS.orders, []),
   cart: read(KEYS.cart, []), // [{ id, qty }]
   cartOpen: false,
 };
 const listeners = new Set();
 
+const PERSISTED = ['products', 'inventory', 'orders', 'cart'];
+
 function setState(patch) {
   state = { ...state, ...patch };
-  for (const k of ['inventory', 'orders', 'cart']) if (k in patch) write(KEYS[k], state[k]);
+  for (const k of PERSISTED) if (k in patch) write(KEYS[k], state[k]);
   listeners.forEach((l) => l());
+}
+
+/** Like setState, but saves first and reports failure (e.g. browser storage full of photos). */
+function commit(patch) {
+  for (const k of PERSISTED) {
+    if (!(k in patch)) continue;
+    try {
+      window.localStorage.setItem(KEYS[k], JSON.stringify(patch[k]));
+    } catch (e) {
+      const full = e && (e.name === 'QuotaExceededError' || e.code === 22);
+      return {
+        ok: false,
+        error: full
+          ? 'Browser storage is full. Remove some photos or use fewer/smaller images, then try again.'
+          : 'Could not save changes in this browser.',
+      };
+    }
+  }
+  state = { ...state, ...patch };
+  listeners.forEach((l) => l());
+  return { ok: true };
 }
 
 function subscribe(listener) {
@@ -80,14 +105,22 @@ if (typeof window !== 'undefined') {
 const useSlice = (pick) => useSyncExternalStore(subscribe, () => pick(state), () => pick(state));
 
 /* ---------------- catalog ---------------- */
-function buildCatalog(inventory) {
-  return PRODUCTS.map((p) => {
+const BUILT_IN_IDS = new Set(PRODUCTS.map((p) => p.id));
+
+function buildCatalog(inventory, custom) {
+  // Newest admin-added watches first, then the built-in catalogue.
+  return [...custom, ...PRODUCTS].map((p) => {
     const o = inventory[p.id] || {};
+    const merged = { ...p, ...o };
     return {
-      ...p,
-      price: o.price ?? p.price,
-      stock: o.stock ?? p.stock ?? 0,
-      active: o.active ?? true,
+      ...merged,
+      custom: !BUILT_IN_IDS.has(p.id),
+      images: merged.images || (merged.image ? [merged.image] : []),
+      watch: WATCH_STYLES[merged.watchStyle] || p.watch || WATCH_STYLES.steelChrono,
+      stock: merged.stock ?? 0,
+      active: merged.active ?? true,
+      gender: merged.gender || ['men', 'women'],
+      tags: merged.tags || [],
     };
   });
 }
@@ -95,7 +128,8 @@ function buildCatalog(inventory) {
 /** All products (including hidden) with live stock/price. */
 export function useCatalog() {
   const inventory = useSlice((s) => s.inventory);
-  return useMemo(() => buildCatalog(inventory), [inventory]);
+  const custom = useSlice((s) => s.products);
+  return useMemo(() => buildCatalog(inventory, custom), [inventory, custom]);
 }
 
 /** Products visible in the shop. */
@@ -105,13 +139,47 @@ export function useShopProducts() {
 }
 
 export function getCatalog() {
-  return buildCatalog(state.inventory);
+  return buildCatalog(state.inventory, state.products);
 }
 
+/** Saves edits to any watch (price, stock, photos, text…). Returns { ok, error? }. */
 export function updateProduct(id, patch) {
   // BACKEND: replace with an API call
   const current = state.inventory[id] || {};
-  setState({ inventory: { ...state.inventory, [id]: { ...current, ...patch } } });
+  return commit({ inventory: { ...state.inventory, [id]: { ...current, ...patch } } });
+}
+
+const slug = (s) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'watch';
+
+/** Adds a new watch from the admin. Returns { ok, product } or { ok: false, error }. */
+export function addProduct(data) {
+  // BACKEND: replace with an API call (and upload photos to file storage)
+  const taken = new Set(getCatalog().map((p) => p.id));
+  let id = slug(data.name);
+  for (let n = 2; taken.has(id); n++) id = `${slug(data.name)}-${n}`;
+  const product = { rating: 5, active: true, ...data, id, createdAt: new Date().toISOString() };
+  const res = commit({ products: [product, ...state.products] });
+  return res.ok ? { ok: true, product } : res;
+}
+
+/** Permanently removes a watch that was added in the admin (built-in watches can only be hidden). */
+export function deleteProduct(id) {
+  if (BUILT_IN_IDS.has(id)) return { ok: false, error: 'Built-in watches can be hidden, not deleted.' };
+  const inventory = { ...state.inventory };
+  delete inventory[id];
+  return commit({
+    products: state.products.filter((p) => p.id !== id),
+    inventory,
+    cart: state.cart.filter((l) => l.id !== id),
+  });
+}
+
+/** Approximate browser storage used by the shop, in bytes. */
+export function storageUsed() {
+  let bytes = 0;
+  for (const key of Object.values(KEYS)) bytes += (window.localStorage.getItem(key) || '').length * 2;
+  return bytes;
 }
 
 /* ---------------- cart ---------------- */
@@ -247,5 +315,5 @@ export function updateOrderStatus(id, status) {
 
 /** Clears all demo orders and stock changes in this browser. */
 export function resetDemoData() {
-  setState({ inventory: {}, orders: [], cart: [] });
+  setState({ products: [], inventory: {}, orders: [], cart: [] });
 }

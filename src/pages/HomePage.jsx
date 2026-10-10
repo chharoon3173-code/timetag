@@ -14,7 +14,13 @@ import { NEW_ARRIVAL_IDS } from '../data/products.js';
 
 export default function HomePage({ wishlist }) {
   const products = useShopProducts();
-  const newArrivals = NEW_ARRIVAL_IDS.map((id) => products.find((p) => p.id === id)).filter(Boolean);
+  // Watches added in the admin and tagged "new" come first, then the default picks.
+  const newArrivals = [
+    ...products.filter((p) => p.custom && p.tags.includes('new')),
+    ...NEW_ARRIVAL_IDS.map((id) => products.find((p) => p.id === id)).filter(Boolean),
+  ]
+    .filter((p, i, arr) => arr.findIndex((x) => x.id === p.id) === i)
+    .slice(0, 4);
 
   useEffect(() => {
     document.title = 'TimeTag — More Than Just Time';
