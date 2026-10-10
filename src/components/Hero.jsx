@@ -1,7 +1,7 @@
-import PhotoWatch from './PhotoWatch.jsx';
+import Watch from './Watch.jsx';
 import Grain from './Grain.jsx';
 import { Arrow } from './Icons.jsx';
-import { HERO_WATCH } from '../data/products.js';
+import { WATCH_STYLES } from '../data/products.js';
 import './Hero.css';
 
 export default function Hero() {
@@ -26,12 +26,12 @@ export default function Hero() {
         <div className="hero__visual">
           <span className="hero__ring hero__ring--outer" />
           <span className="hero__ring hero__ring--inner" />
-          <div className="hero__watch hero__watch--photo">
-            <PhotoWatch watch={HERO_WATCH} />
+          <div className="hero__watch">
+            <Watch style={WATCH_STYLES.steelChrono} />
           </div>
           <div className="hero__spec">
             <span>Featured</span>
-            <strong>{HERO_WATCH.name}</strong>
+            <strong>Chronograph X1</strong>
           </div>
         </div>
       </div>

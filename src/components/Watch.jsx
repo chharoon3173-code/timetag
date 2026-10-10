@@ -1,10 +1,21 @@
 import { useId } from 'react';
-import { handVars, usePktStart } from '../lib/clock.js';
+import { usePktStart } from '../lib/clock.js';
 
 /**
  * Vector watch render used until real product photography is added.
  * `style` is one of WATCH_STYLES from data/products.js.
  */
+/** CSS variables for a hand that turns once every `period` seconds, starting at the current PKT time. */
+function handVars(start, period) {
+  const elapsed = start % period;
+  return {
+    '--dur': `${period}s`,
+    '--delay': `-${elapsed.toFixed(3)}s`,
+    // shown as-is if animations are unavailable, so the time is still right on load
+    transform: `rotate(${((elapsed / period) * 360).toFixed(3)}deg)`,
+  };
+}
+
 export default function Watch({ style, className = '' }) {
   const uid = useId().replace(/:/g, '');
   const start = usePktStart();
