@@ -3,16 +3,17 @@ import { ProductVisual } from './Watch.jsx';
 import HeartButton from './HeartButton.jsx';
 import Reveal from './Reveal.jsx';
 import { Arrow, Stars } from './Icons.jsx';
-import { FILTERS, PRODUCTS, formatPrice } from '../data/products.js';
+import { FILTERS, formatPrice } from '../data/products.js';
+import { href } from '../lib/router.js';
 import './TimeTagEdit.css';
 
-export default function TimeTagEdit({ wishlist }) {
+export default function TimeTagEdit({ wishlist, products }) {
   const [filter, setFilter] = useState('all');
 
   const items = useMemo(() => {
     const f = FILTERS.find((x) => x.key === filter) ?? FILTERS[0];
-    return PRODUCTS.filter(f.test).slice(0, 4);
-  }, [filter]);
+    return products.filter(f.test).slice(0, 4);
+  }, [filter, products]);
 
   const [featured, ...rest] = items;
 
@@ -52,12 +53,12 @@ export default function TimeTagEdit({ wishlist }) {
                 <ProductVisual product={featured} />
               </div>
               <div className="pcard__info">
-                <h3 className="pcard__name pcard__name--lg">{featured.name}</h3>
+                <h3 className="pcard__name pcard__name--lg"><a href={href(`/product/${featured.id}`)}>{featured.name}</a></h3>
                 <p className="pcard__desc">“{featured.description}”</p>
                 <Stars rating={featured.rating} />
                 <div className="pcard__row">
-                  <span className="pcard__price pcard__price--lg">{formatPrice(featured.price)}</span>
-                  <a href="#edit" className="btn pcard__btn">View Details <Arrow /></a>
+                  <span className="pcard__price pcard__price--lg">{formatPrice(featured.price)}{featured.stock <= 0 && <em className="pcard__soldout">Sold out</em>}</span>
+                  <a href={href(`/product/${featured.id}`)} className="btn pcard__btn">View Details <Arrow /></a>
                 </div>
               </div>
             </article>
@@ -72,9 +73,9 @@ export default function TimeTagEdit({ wishlist }) {
                 </div>
                 <div className="pcard__info pcard__info--compact">
                   <span className="pcard__badge pcard__badge--inline">{p.collection}</span>
-                  <h3 className="pcard__name">{p.name}</h3>
-                  <span className="pcard__price">{formatPrice(p.price)}</span>
-                  <a href="#edit" className="btn btn--small pcard__btn">View</a>
+                  <h3 className="pcard__name"><a href={href(`/product/${p.id}`)}>{p.name}</a></h3>
+                  <span className="pcard__price">{formatPrice(p.price)}{p.stock <= 0 && <em className="pcard__soldout">Sold out</em>}</span>
+                  <a href={href(`/product/${p.id}`)} className="btn btn--small pcard__btn" aria-label={`View ${p.name}`}>View</a>
                 </div>
               </article>
             ))}

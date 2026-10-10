@@ -52,6 +52,7 @@ export default function Footer() {
             <a href="#contact">Privacy</a>
             <a href="#contact">Terms</a>
             <a href="#contact">Cookies</a>
+            <a href="#/admin">Staff login</a>
           </div>
         </div>
       </div>

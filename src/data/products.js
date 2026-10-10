@@ -52,6 +52,7 @@ export const PRODUCTS = [
     badge: 'Best Seller',
     description: 'Precision engineered for those who make every second count.',
     price: 64999,
+    stock: 8,                 // starting stock (admin can change it)
     rating: 5,
     gender: ['men'],
     tags: ['best'],
@@ -65,6 +66,7 @@ export const PRODUCTS = [
     badge: 'Best Seller',
     description: 'Ivory dial and warm gold — the quiet confidence of a classic.',
     price: 58500,
+    stock: 5,                 // starting stock (admin can change it)
     rating: 5,
     gender: ['women', 'men'],
     tags: ['best'],
@@ -78,6 +80,7 @@ export const PRODUCTS = [
     badge: 'New Arrival',
     description: 'A midnight dial that reads like a clear night sky.',
     price: 72000,
+    stock: 12,                 // starting stock (admin can change it)
     rating: 5,
     gender: ['men', 'women'],
     tags: ['new'],
@@ -91,6 +94,7 @@ export const PRODUCTS = [
     badge: 'New Arrival',
     description: 'Champagne warmth, sized for a refined wrist.',
     price: 46999,
+    stock: 3,                 // starting stock (admin can change it)
     rating: 5,
     gender: ['women'],
     tags: ['new'],
@@ -104,6 +108,7 @@ export const PRODUCTS = [
     badge: 'Best Seller',
     description: 'Blacked-out steel with gold detailing, made for after dark.',
     price: 54999,
+    stock: 10,                 // starting stock (admin can change it)
     rating: 5,
     gender: ['men'],
     tags: ['best', 'new'],
@@ -117,6 +122,7 @@ export const PRODUCTS = [
     badge: 'New Arrival',
     description: 'Forest-green dial, gold case, two time zones at a glance.',
     price: 89000,
+    stock: 4,                 // starting stock (admin can change it)
     rating: 5,
     gender: ['men', 'women'],
     tags: ['new', 'best'],

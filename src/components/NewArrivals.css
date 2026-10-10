@@ -87,3 +87,5 @@
   }
   .arrival { scroll-snap-align: start; }
 }
+.arrival__watch { display: block; }
+.arrival__tag--muted { background: #8e887d; }

@@ -10,7 +10,7 @@ const NAV = [
   { label: 'Contact', href: '#contact' },
 ];
 
-export default function Header({ wishlistCount = 0, bagCount = 0 }) {
+export default function Header({ wishlistCount = 0, bagCount = 0, onBagClick }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -52,7 +52,7 @@ export default function Header({ wishlistCount = 0, bagCount = 0 }) {
               <HeartIcon />
               {wishlistCount > 0 && <span className="icon-badge">{wishlistCount}</span>}
             </button>
-            <button type="button" className="icon-btn" aria-label={`Shopping bag, ${bagCount} items`}>
+            <button type="button" className="icon-btn" aria-label={`Shopping bag, ${bagCount} items`} onClick={onBagClick}>
               <BagIcon />
               {bagCount > 0 && <span className="icon-badge">{bagCount}</span>}
             </button>
