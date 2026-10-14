@@ -48,7 +48,7 @@ export const PRODUCTS = [
   {
     id: 'chronograph-x1',
     name: 'TimeTag Chronograph X1',
-    collection: 'Chronographs',
+    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
     badge: 'Best Seller',
     description: 'Precision engineered for those who make every second count.',
     price: 64999,
@@ -62,7 +62,7 @@ export const PRODUCTS = [
   {
     id: 'heritage-classique',
     name: 'Heritage Classique',
-    collection: 'The Classics',
+    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
     badge: 'Best Seller',
     description: 'Ivory dial and warm gold — the quiet confidence of a classic.',
     price: 58500,
@@ -76,7 +76,7 @@ export const PRODUCTS = [
   {
     id: 'meridian-automatic',
     name: 'Meridian Automatic',
-    collection: 'Modern Icons',
+    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
     badge: 'New Arrival',
     description: 'A midnight dial that reads like a clear night sky.',
     price: 72000,
@@ -90,7 +90,7 @@ export const PRODUCTS = [
   {
     id: 'aurelia-34',
     name: 'Aurelia 34',
-    collection: 'Everyday Essentials',
+    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
     badge: 'New Arrival',
     description: 'Champagne warmth, sized for a refined wrist.',
     price: 46999,
@@ -104,7 +104,7 @@ export const PRODUCTS = [
   {
     id: 'noir-chronograph',
     name: 'Noir Chronograph',
-    collection: 'Chronographs',
+    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
     badge: 'Best Seller',
     description: 'Blacked-out steel with gold detailing, made for after dark.',
     price: 54999,
@@ -118,7 +118,7 @@ export const PRODUCTS = [
   {
     id: 'verdant-gmt',
     name: 'Verdant GMT',
-    collection: 'Modern Icons',
+    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
     badge: 'New Arrival',
     description: 'Forest-green dial, gold case, two time zones at a glance.',
     price: 89000,
@@ -140,18 +140,11 @@ export const FILTERS = [
   { key: 'new', label: 'New Arrivals', test: (p) => p.tags.includes('new') },
 ];
 
-// Collection names for the admin's "Collection" dropdown.
-export const COLLECTIONS = [
-  { id: 'classics', number: '01', title: 'The Classics', description: 'Traditional elegance, refined over generations of style.', tone: 'amber', size: 'large', watch: WATCH_STYLES.heritageGold },
-  { id: 'modern', number: '02', title: 'Modern Icons', description: 'Contemporary design with a confident presence.', tone: 'navy', size: 'medium', watch: WATCH_STYLES.midnight },
-  { id: 'chrono', number: '03', title: 'Chronographs', description: 'Sporty precision, sophisticated finish.', tone: 'graphite', size: 'medium', watch: WATCH_STYLES.steelChrono },
-  { id: 'everyday', number: '04', title: 'Everyday Essentials', description: 'Versatile watches for every day and every occasion.', tone: 'bronze', size: 'large', watch: WATCH_STYLES.champagne },
-];
-
-// Brand tiles in the home page "Shop by Collection" row.
-// `mark` is the monogram shown in the circle. To show a logo image instead, put the file in
-// /public/brand/collections/ and set `image: 'brand/collections/your-file.png'`.
-export const BRAND_COLLECTIONS = [
+// The starting list of collections (the home page "Shop by Collection" logos, the footer, and the
+// admin's "Collection" dropdown). Once you add, edit or delete a collection in Admin → Collections,
+// the admin's list is used instead of this one.
+// `mark` is the monogram shown when there's no logo; `image` is the logo (files in /public/brand/collections/).
+export const DEFAULT_COLLECTIONS = [
   { id: 'rolex', title: 'Rolex', mark: 'R', image: 'brand/collections/rolex.png' },
   { id: 'patek-philippe', title: 'Patek Philippe', mark: 'PP', image: 'brand/collections/patek-philippe.png' },
   { id: 'hublot', title: 'Hublot', mark: 'H', image: 'brand/collections/hublot.png' },

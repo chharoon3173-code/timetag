@@ -7,13 +7,12 @@ import SignatureCollection from '../components/SignatureCollection.jsx';
 import CustomerReviews from '../components/CustomerReviews.jsx';
 import WhyChooseUs from '../components/WhyChooseUs.jsx';
 import Newsletter from '../components/Newsletter.jsx';
-import { useShopProducts } from '../lib/store.js';
+import { useShopProducts, useSignatureProducts } from '../lib/store.js';
 
 export default function HomePage({ wishlist }) {
   const products = useShopProducts();
-  // Signature Collection = watches tagged "Best Sellers" in the admin (all watches if fewer than 3), max 8.
-  const bestSellers = products.filter((p) => p.tags.includes('best'));
-  const signature = (bestSellers.length >= 3 ? bestSellers : products).slice(0, 8);
+  // Signature Collection = the 4 watches picked in Admin → Collections (first 4 Best Sellers if none picked).
+  const signature = useSignatureProducts();
 
   useEffect(() => {
     document.title = 'TimeTag — More Than Just Time';

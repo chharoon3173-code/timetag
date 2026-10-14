@@ -1,9 +1,11 @@
+import { useMemo } from 'react';
 import { BrandLockup, FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from './Icons.jsx';
+import { useCollections } from '../lib/store.js';
 import './Footer.css';
 
-const COLUMNS = [
-  { title: 'Shop', links: [['All Watches', '#edit'], ["Men's", '#edit'], ["Women's", '#edit'], ['New Arrivals', '#edit'], ['Best Sellers', '#edit']] },
-  { title: 'Collections', links: [['The Classics', '#collections'], ['Modern Icons', '#collections'], ['Chronographs', '#collections'], ['Everyday Essentials', '#collections']] },
+const SHOP = { title: 'Shop', links: [['All Watches', '#edit'], ["Men's", '#edit'], ["Women's", '#edit'], ['New Arrivals', '#edit'], ['Best Sellers', '#edit']] };
+// The "Collections" column is filled in from Admin → Collections (see Footer below).
+const OTHER_COLUMNS = [
   { title: 'Customer Care', links: [['Shipping', '#contact'], ['Returns', '#contact'], ['Warranty', '#contact'], ['Watch Care', '#contact'], ['FAQ', '#contact']] },
   { title: 'About', links: [['Our Story', '#story'], ['Journal', '#story'], ['Contact', '#contact'], ['Store Locator', '#contact']] },
 ];
@@ -17,6 +19,11 @@ const SOCIAL = [
 ];
 
 export default function Footer() {
+  const collections = useCollections();
+  const columns = useMemo(
+    () => [SHOP, { title: 'Collections', links: collections.map((c) => [c.title, '#collections']) }, ...OTHER_COLUMNS],
+    [collections]
+  );
   return (
     <footer className="footer" id="contact">
       <div className="container">
@@ -35,7 +42,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {COLUMNS.map((col) => (
+          {columns.map((col) => (
             <nav key={col.title} className="footer__col" aria-label={col.title}>
               <h4>{col.title}</h4>
               {col.links.map(([label, href]) => (

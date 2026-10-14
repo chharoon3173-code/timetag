@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Watch from '../components/Watch.jsx';
-import { COLLECTIONS, WATCH_STYLES } from '../data/products.js';
-import { addProduct, deleteProduct, updateProduct } from '../lib/store.js';
+import { WATCH_STYLES } from '../data/products.js';
+import { addProduct, deleteProduct, updateProduct, useCollections } from '../lib/store.js';
 import { MAX_PHOTOS, compressImage, dataUrlKB } from '../lib/images.js';
 
 const STYLE_OPTIONS = [
@@ -15,7 +15,7 @@ const STYLE_OPTIONS = [
 
 const BLANK = {
   name: '',
-  collection: COLLECTIONS[0].title,
+  collectionId: '', // chosen in the form (required)
   price: '',
   stock: '',
   badge: '',
@@ -31,7 +31,7 @@ const BLANK = {
 function fromProduct(p) {
   return {
     name: p.name,
-    collection: p.collection,
+    collectionId: p.collectionId || '',
     price: String(p.price),
     stock: String(p.stock),
     badge: p.badge || '',
@@ -49,6 +49,7 @@ const toggle = (list, v) => (list.includes(v) ? list.filter((x) => x !== v) : [.
 
 export default function ProductEditor({ product, onClose, onSaved }) {
   const isNew = !product;
+  const collections = useCollections();
   const [f, setF] = useState(() => (product ? fromProduct(product) : BLANK));
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -108,6 +109,7 @@ export default function ProductEditor({ product, onClose, onSaved }) {
   function validate() {
     const e = {};
     if (!f.name.trim()) e.name = 'Enter a name';
+    if (!collections.some((c) => c.id === f.collectionId)) e.collectionId = 'Choose a collection';
     const price = Number(f.price);
     if (!f.price || !Number.isFinite(price) || price <= 0) e.price = 'Enter a price above 0';
     const stock = Number(f.stock);
@@ -126,7 +128,7 @@ export default function ProductEditor({ product, onClose, onSaved }) {
 
     const data = {
       name: f.name.trim(),
-      collection: f.collection,
+      collectionId: f.collectionId,
       price: Math.round(Number(f.price)),
       stock: Number(f.stock),
       badge: f.badge.trim(),
@@ -241,10 +243,12 @@ export default function ProductEditor({ product, onClose, onSaved }) {
           </div>
           <div className="adm-form__row">
             <label className="adm-field">
-              <span>Collection</span>
-              <select className="adm-input" value={f.collection} onChange={(e) => set('collection', e.target.value)}>
-                {COLLECTIONS.map((c) => <option key={c.id}>{c.title}</option>)}
+              <span>Collection *</span>
+              <select className={`adm-input${errors.collectionId ? ' is-error' : ''}`} value={f.collectionId} onChange={(e) => set('collectionId', e.target.value)}>
+                <option value="">Choose a collection…</option>
+                {collections.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
               </select>
+              {errors.collectionId && <em>{errors.collectionId}</em>}
             </label>
             <label className="adm-field">
               <span>Label on card (optional)</span>

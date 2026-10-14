@@ -68,8 +68,11 @@ timetag/
 - **Orders:** filter by status, search, open an order to see the customer and address, change status
   (Pending → Confirmed → Shipped → Delivered, or Cancelled — cancelling puts the stock back), call or
   WhatsApp the customer, export to CSV.
+- **Collections:** pick the 4 watches for the home page **Signature Collection** dial; **+ Add collection**
+  (name + optional logo), rename it, change its logo or delete it. Collections show in the home page
+  "Shop by Collection" row and the footer. Watches with no collection are flagged here.
 - **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, price, stock,
-  collection, description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
+  collection (required), description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
   choose; first photo is the main one; reorder or remove). Photos are resized automatically. **Edit** any
   watch (including the built-in ones) to add photos or change its text; watches you added can be deleted.
 - The password itself is not in the code — only its SHA-256 fingerprint (see `src/lib/auth.js` for how to change it).

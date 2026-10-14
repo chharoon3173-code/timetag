@@ -37,7 +37,7 @@ export default function NewArrivals({
               <div className="arrival__meta">
                 <div>
                   <h3 className="arrival__name"><a href={href(`/product/${p.id}`)}>{p.name}</a></h3>
-                  <p className="arrival__coll">{p.collection}</p>
+                  {p.collection && <p className="arrival__coll">{p.collection}</p>}
                 </div>
                 <span className="arrival__price">{formatPrice(p.price)}</span>
               </div>

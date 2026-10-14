@@ -23,12 +23,13 @@ function loadImage(file) {
   });
 }
 
-export async function compressImage(file) {
+/** `maxSide`: longest side in pixels after resizing (logos can be smaller than watch photos). */
+export async function compressImage(file, maxSide = MAX_SIDE) {
   if (!file.type.startsWith('image/')) throw new Error(`“${file.name}” is not an image.`);
   if (file.size > MAX_INPUT_MB * 1024 * 1024) throw new Error(`“${file.name}” is larger than ${MAX_INPUT_MB} MB.`);
 
   const img = await loadImage(file);
-  const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
   const w = Math.max(1, Math.round(img.naturalWidth * scale));
   const h = Math.max(1, Math.round(img.naturalHeight * scale));
 

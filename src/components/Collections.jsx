@@ -1,9 +1,10 @@
 import Reveal from './Reveal.jsx';
 import { Arrow } from './Icons.jsx';
-import { BRAND_COLLECTIONS } from '../data/products.js';
+import { useCollections } from '../lib/store.js';
 import './Collections.css';
 
 export default function Collections() {
+  const collections = useCollections(); // managed in Admin → Collections
   return (
     <section className="section section--ivory" id="collections" aria-labelledby="collections-title">
       <div className="container">
@@ -18,7 +19,7 @@ export default function Collections() {
         {/* Swipeable row of brand tiles */}
         <Reveal>
           <div className="collections">
-            {BRAND_COLLECTIONS.map((c) => (
+            {collections.map((c) => (
               <a key={c.id} href="#edit" className="collection">
                 <span className="collection__mark" aria-hidden="true">
                   {c.image ? <img src={c.image} alt="" loading="lazy" /> : c.mark}

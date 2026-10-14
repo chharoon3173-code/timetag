@@ -39,7 +39,7 @@ export default function TimeTagEdit({ wishlist, products }) {
                     <HeartButton product={p} wishlist={wishlist} light size={16} />
                   </div>
                   <div className="shop-card__info">
-                    <p className="shop-card__coll">{p.collection}</p>
+                    {p.collection && <p className="shop-card__coll">{p.collection}</p>}
                     <h3 className="shop-card__name"><a href={link}>{p.name}</a></h3>
                     <p className="shop-card__price">{formatPrice(p.price)}</p>
                   </div>

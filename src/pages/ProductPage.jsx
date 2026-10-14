@@ -47,7 +47,8 @@ export default function ProductPage({ id, wishlist }) {
   const related = useMemo(() => {
     if (!product) return [];
     const others = products.filter((p) => p.id !== product.id);
-    return [...others.filter((p) => p.collection === product.collection), ...others.filter((p) => p.collection !== product.collection)].slice(0, 4);
+    const same = (p) => !!product.collectionId && p.collectionId === product.collectionId;
+    return [...others.filter(same), ...others.filter((p) => !same(p))].slice(0, 4);
   }, [products, product]);
 
   if (!product) return <NotFound title="Watch not found" text="This watch isn’t available right now." />;
@@ -82,7 +83,7 @@ export default function ProductPage({ id, wishlist }) {
         <div className="container">
           <nav className="pp-crumbs" aria-label="Breadcrumb">
             <a href="#top">Home</a><span aria-hidden="true">/</span>
-            <a href="#collections">{product.collection}</a><span aria-hidden="true">/</span>
+            {product.collection && <><a href="#collections">{product.collection}</a><span aria-hidden="true">/</span></>}
             <span aria-current="page">{product.name}</span>
           </nav>
 
@@ -112,7 +113,7 @@ export default function ProductPage({ id, wishlist }) {
             </div>
 
             <div className="pp-info">
-              <p className="eyebrow">{product.collection}</p>
+              {product.collection && <p className="eyebrow">{product.collection}</p>}
               <h1 className="pp-title">{product.name}</h1>
               <div className="pp-rating"><Stars rating={product.rating} /></div>
               <p className="pp-price">{formatPrice(product.price)}</p>
@@ -146,7 +147,7 @@ export default function ProductPage({ id, wishlist }) {
                 <details open>
                   <summary>Details</summary>
                   <dl className="pp-specs">
-                    <div><dt>Collection</dt><dd>{product.collection}</dd></div>
+                    {product.collection && <div><dt>Collection</dt><dd>{product.collection}</dd></div>}
                     <div><dt>Strap</dt><dd>{product.strap || (product.watch.bracelet ? 'Steel bracelet' : 'Leather strap')}</dd></div>
                     {(product.specs || []).map(([k, v]) => (
                       <div key={k}><dt>{k}</dt><dd>{v}</dd></div>

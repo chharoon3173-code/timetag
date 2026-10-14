@@ -272,7 +272,7 @@ export default function SignatureCollection({ products }) {
               <span>{pad(active + 1)}</span> / {pad(n)}
             </p>
             <div className="sig__text" key={product.id} aria-live="polite">
-              <p className="sig__coll">{product.collection}</p>
+              {product.collection && <p className="sig__coll">{product.collection}</p>}
               <h3 className="sig__name">{product.name}</h3>
               <p className="sig__desc">{product.description}</p>
               <p className="sig__price">

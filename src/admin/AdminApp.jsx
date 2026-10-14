@@ -3,6 +3,7 @@ import AdminLogin from './AdminLogin.jsx';
 import Overview from './Overview.jsx';
 import Orders from './Orders.jsx';
 import Inventory from './Inventory.jsx';
+import Collections from './Collections.jsx';
 import { isLoggedIn, logout } from '../lib/auth.js';
 import { LOW_STOCK, useCatalog, useOrders } from '../lib/store.js';
 import { href } from '../lib/router.js';
@@ -12,6 +13,7 @@ const TABS = [
   { id: 'overview', label: 'Overview' },
   { id: 'orders', label: 'Orders' },
   { id: 'inventory', label: 'Inventory' },
+  { id: 'collections', label: 'Collections' },
 ];
 
 export default function AdminApp() {
@@ -29,7 +31,8 @@ export default function AdminApp() {
 
   const pending = orders.filter((o) => o.status === 'pending').length;
   const low = catalog.filter((p) => p.stock <= LOW_STOCK).length;
-  const badges = { orders: pending, inventory: low };
+  const noCollection = catalog.filter((p) => !p.collectionId).length;
+  const badges = { orders: pending, inventory: low, collections: noCollection };
 
   const goToOrder = (id) => {
     setTab('orders');
@@ -65,6 +68,7 @@ export default function AdminApp() {
         {tab === 'overview' && <Overview orders={orders} catalog={catalog} onOpenOrder={goToOrder} onGo={setTab} />}
         {tab === 'orders' && <Orders orders={orders} catalog={catalog} openId={openOrder} setOpenId={setOpenOrder} />}
         {tab === 'inventory' && <Inventory catalog={catalog} />}
+        {tab === 'collections' && <Collections catalog={catalog} onOpenInventory={() => setTab('inventory')} />}
       </main>
     </div>
   );

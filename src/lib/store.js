@@ -1,5 +1,6 @@
 /**
- * TimeTag data store — catalog overrides (stock/price/visibility), orders and the cart.
+ * TimeTag data store — catalog overrides (stock/price/visibility), collections, the Signature
+ * Collection picks, orders and the cart.
  *
  * ⚠️  DEMO STORAGE: everything is saved in the visitor's browser (localStorage).
  *     Orders placed on one device are NOT visible on another. To go live, replace the
@@ -7,17 +8,24 @@
  *     The rest of the app only talks to this file, so nothing else needs to change.
  */
 import { useMemo, useSyncExternalStore } from 'react';
-import { PRODUCTS, WATCH_STYLES } from '../data/products.js';
+import { DEFAULT_COLLECTIONS, PRODUCTS, WATCH_STYLES } from '../data/products.js';
 
 const KEYS = {
   products: 'timetag:products', // watches added from the admin panel
   inventory: 'timetag:inventory',
   orders: 'timetag:orders',
   cart: 'timetag:cart',
+  collections: 'timetag:collections', // the collection list, once it's been edited in the admin
+  signature: 'timetag:signature', // watch ids picked for the Signature Collection (4 slots)
 };
+
+// What each saved item falls back to when nothing is stored yet.
+// `null` for collections/signature means "use the defaults".
+const FALLBACKS = { products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null };
 
 export const LOW_STOCK = 3;
 export const MAX_PER_ITEM = 5;
+export const MAX_SIGNATURE = 4; // the home page dial fits 4 watches
 
 export const SHIPPING_METHODS = [
   { id: 'standard', label: 'Standard delivery', detail: '3–5 business days', price: 0 },
@@ -54,11 +62,13 @@ let state = {
   inventory: read(KEYS.inventory, {}), // { [productId]: { stock, price, active, images, ...edits } }
   orders: read(KEYS.orders, []),
   cart: read(KEYS.cart, []), // [{ id, qty }]
+  collections: read(KEYS.collections, null), // [{ id, title, image }] or null = DEFAULT_COLLECTIONS
+  signature: read(KEYS.signature, null), // ['watch-id', '', …] (empty string = empty slot) or null
   cartOpen: false,
 };
 const listeners = new Set();
 
-const PERSISTED = ['products', 'inventory', 'orders', 'cart'];
+const PERSISTED = ['products', 'inventory', 'orders', 'cart', 'collections', 'signature'];
 
 function setState(patch) {
   state = { ...state, ...patch };
@@ -97,23 +107,94 @@ if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
     const entry = Object.entries(KEYS).find(([, key]) => key === e.key);
     if (!entry) return;
-    state = { ...state, [entry[0]]: read(e.key, entry[0] === 'inventory' ? {} : []) };
+    state = { ...state, [entry[0]]: read(e.key, FALLBACKS[entry[0]]) };
     listeners.forEach((l) => l());
   });
 }
 
 const useSlice = (pick) => useSyncExternalStore(subscribe, () => pick(state), () => pick(state));
 
+const slug = (s, fallback) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || fallback;
+
+/* ---------------- collections ---------------- */
+/** "Master Grade" → "MG". Shown in the circle when a collection has no logo. */
+const initials = (title) =>
+  title.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
+
+function listCollections(stored) {
+  return (stored ?? DEFAULT_COLLECTIONS).map((c) => ({ ...c, image: c.image || null, mark: c.mark || initials(c.title) }));
+}
+
+/** The collections, in display order: [{ id, title, image, mark }]. */
+export function useCollections() {
+  const stored = useSlice((s) => s.collections);
+  return useMemo(() => listCollections(stored), [stored]);
+}
+
+export const getCollections = () => listCollections(state.collections);
+
+const titleTaken = (title, exceptId) =>
+  getCollections().some((c) => c.id !== exceptId && c.title.trim().toLowerCase() === title.trim().toLowerCase());
+
+/** Adds a collection from the admin. Returns { ok, collection } or { ok: false, error }. */
+export function addCollection({ title, image = null }) {
+  // BACKEND: replace with an API call (and upload the logo to file storage)
+  const name = title.trim();
+  if (!name) return { ok: false, error: 'Enter a collection name.' };
+  if (titleTaken(name)) return { ok: false, error: `You already have a collection called “${name}”.` };
+  const list = getCollections();
+  const taken = new Set(list.map((c) => c.id));
+  let id = slug(name, 'collection');
+  for (let n = 2; taken.has(id); n++) id = `${slug(name, 'collection')}-${n}`;
+  const collection = { id, title: name, image };
+  const res = commit({ collections: [...list.map(({ id, title, image }) => ({ id, title, image })), collection] });
+  return res.ok ? { ok: true, collection } : res;
+}
+
+/** Renames a collection or changes its logo. Its watches follow automatically. */
+export function updateCollection(id, { title, image }) {
+  // BACKEND: replace with an API call
+  const name = title.trim();
+  if (!name) return { ok: false, error: 'Enter a collection name.' };
+  if (titleTaken(name, id)) return { ok: false, error: `You already have a collection called “${name}”.` };
+  return commit({
+    collections: getCollections().map((c) => (c.id === id ? { id, title: name, image } : { id: c.id, title: c.title, image: c.image })),
+  });
+}
+
+/** Deletes a collection. Its watches are kept and become "No collection". */
+export function deleteCollection(id) {
+  // BACKEND: replace with an API call
+  const clear = (p) => (p.collectionId === id ? { ...p, collectionId: null } : p);
+  const inventory = Object.fromEntries(Object.entries(state.inventory).map(([k, v]) => [k, clear(v)]));
+  return commit({
+    collections: getCollections().filter((c) => c.id !== id).map(({ id, title, image }) => ({ id, title, image })),
+    products: state.products.map(clear),
+    inventory,
+  });
+}
+
 /* ---------------- catalog ---------------- */
 const BUILT_IN_IDS = new Set(PRODUCTS.map((p) => p.id));
 
-function buildCatalog(inventory, custom) {
+function buildCatalog(inventory, custom, collections) {
+  const byId = new Map(collections.map((c) => [c.id, c]));
+  const byTitle = new Map(collections.map((c) => [c.title.toLowerCase(), c]));
   // Newest admin-added watches first, then the built-in catalogue.
   return [...custom, ...PRODUCTS].map((p) => {
     const o = inventory[p.id] || {};
     const merged = { ...p, ...o };
+    // Watches point to their collection by id. Older watches saved before collections could be
+    // managed only have a name, so match that by name (old names like "The Classics" won't match).
+    const col =
+      merged.collectionId !== undefined
+        ? byId.get(merged.collectionId)
+        : byTitle.get(String(merged.collection || '').toLowerCase());
     return {
       ...merged,
+      collectionId: col ? col.id : null,
+      collection: col ? col.title : '', // the name shown on the site ('' = no collection)
       custom: !BUILT_IN_IDS.has(p.id),
       images: merged.images || (merged.image ? [merged.image] : []),
       watch: WATCH_STYLES[merged.watchStyle] || p.watch || WATCH_STYLES.steelChrono,
@@ -129,7 +210,8 @@ function buildCatalog(inventory, custom) {
 export function useCatalog() {
   const inventory = useSlice((s) => s.inventory);
   const custom = useSlice((s) => s.products);
-  return useMemo(() => buildCatalog(inventory, custom), [inventory, custom]);
+  const collections = useCollections();
+  return useMemo(() => buildCatalog(inventory, custom, collections), [inventory, custom, collections]);
 }
 
 /** Products visible in the shop. */
@@ -139,7 +221,40 @@ export function useShopProducts() {
 }
 
 export function getCatalog() {
-  return buildCatalog(state.inventory, state.products);
+  return buildCatalog(state.inventory, state.products, getCollections());
+}
+
+/* ---------------- Signature Collection ---------------- */
+const NO_PICKS = [];
+
+/** The 4 slots picked in the admin: ['watch-id', '', …] ('' = empty slot). */
+export function useSignatureSlots() {
+  const stored = useSlice((s) => s.signature);
+  return useMemo(
+    () => Array.from({ length: MAX_SIGNATURE }, (_, i) => (stored || NO_PICKS)[i] || ''),
+    [stored]
+  );
+}
+
+/** Saves the Signature Collection slots (up to 4 watch ids, '' for empty). */
+export function setSignatureSlots(slots) {
+  // BACKEND: replace with an API call
+  return commit({ signature: slots.slice(0, MAX_SIGNATURE).map((id) => id || '') });
+}
+
+/**
+ * Watches for the home page dial: the picked ones that are visible, in slot order.
+ * If none are picked (or all are hidden), the first 4 Best Sellers — so the dial is never empty.
+ */
+export function useSignatureProducts() {
+  const products = useShopProducts();
+  const slots = useSignatureSlots();
+  return useMemo(() => {
+    const picked = slots.map((id) => products.find((p) => p.id === id)).filter(Boolean);
+    if (picked.length) return picked;
+    const best = products.filter((p) => p.tags.includes('best'));
+    return (best.length ? best : products).slice(0, MAX_SIGNATURE);
+  }, [products, slots]);
 }
 
 /** Saves edits to any watch (price, stock, photos, text…). Returns { ok, error? }. */
@@ -149,15 +264,12 @@ export function updateProduct(id, patch) {
   return commit({ inventory: { ...state.inventory, [id]: { ...current, ...patch } } });
 }
 
-const slug = (s) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'watch';
-
 /** Adds a new watch from the admin. Returns { ok, product } or { ok: false, error }. */
 export function addProduct(data) {
   // BACKEND: replace with an API call (and upload photos to file storage)
   const taken = new Set(getCatalog().map((p) => p.id));
-  let id = slug(data.name);
-  for (let n = 2; taken.has(id); n++) id = `${slug(data.name)}-${n}`;
+  let id = slug(data.name, 'watch');
+  for (let n = 2; taken.has(id); n++) id = `${slug(data.name, 'watch')}-${n}`;
   const product = { rating: 5, active: true, ...data, id, createdAt: new Date().toISOString() };
   const res = commit({ products: [product, ...state.products] });
   return res.ok ? { ok: true, product } : res;
@@ -172,6 +284,8 @@ export function deleteProduct(id) {
     products: state.products.filter((p) => p.id !== id),
     inventory,
     cart: state.cart.filter((l) => l.id !== id),
+    // free its Signature Collection slot, if it had one
+    ...(state.signature?.includes(id) && { signature: state.signature.map((s) => (s === id ? '' : s)) }),
   });
 }
 
@@ -313,7 +427,7 @@ export function updateOrderStatus(id, status) {
   setState({ orders, inventory });
 }
 
-/** Clears all demo orders and stock changes in this browser. */
+/** Clears all demo orders, stock changes, collection edits and Signature picks in this browser. */
 export function resetDemoData() {
-  setState({ products: [], inventory: {}, orders: [], cart: [] });
+  setState({ products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null });
 }

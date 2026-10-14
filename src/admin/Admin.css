@@ -326,3 +326,65 @@
   .adm-form__row { grid-template-columns: minmax(0, 1fr); }
   .adm-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ---------- Collections tab ---------- */
+.adm-strong { font-weight: 500; }
+.adm-td-end { text-align: right; }
+.adm-nocol { color: #a1271b; font-weight: 500; }
+.adm-logo {
+  width: 52px; height: 52px; flex: none; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; overflow: hidden;
+  background: var(--ivory); color: var(--gold-deep); font-size: 16px; font-weight: 400; letter-spacing: 0.04em;
+}
+.adm-logo img { width: 72%; height: 72%; object-fit: contain; }
+.adm-alert {
+  margin: 0 0 16px; padding: 12px 16px; border: 1px solid #f0c9c3; border-radius: 8px;
+  background: #fdf3f1; color: #7a2a20; font-size: 13px; line-height: 1.6;
+}
+
+/* Signature Collection slots */
+.adm-sig { margin-bottom: 16px; }
+.adm-sig__hint { margin: -4px 0 16px; }
+.adm-sig__slots {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;
+}
+.adm-sig__slot {
+  position: relative; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 16px 12px 14px; border: 1px solid var(--a-line); border-radius: 10px; background: #fbfaf7;
+}
+.adm-sig__slot.is-empty { border-style: dashed; }
+.adm-sig__no { position: absolute; top: 10px; left: 12px; font-size: 12px; letter-spacing: 0.12em; color: var(--a-gold); font-weight: 500; }
+.adm-sig__thumb {
+  width: 84px; height: 84px; border-radius: 50%; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 40%, #2b2620 0%, #121110 100%);
+  border: 1px solid rgba(201, 169, 110, 0.35);
+}
+.adm-sig__thumb > svg { width: 44%; }
+.adm-sig__thumb > img { width: 100%; height: 100%; object-fit: cover; }
+.adm-sig__slot.is-empty .adm-sig__thumb { background: #f1ede5; border: 1px dashed #d3ccbf; color: #b5ad9e; font-size: 28px; font-weight: 300; }
+.adm-sig__slot .adm-input { height: 40px; font-size: 13px; }
+.adm-sig__warn { font-style: normal; font-size: 12px; line-height: 1.4; color: #a1271b; text-align: center; }
+
+/* collection editor preview (looks like the home page tile) */
+.adm-colprev {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  width: 180px; padding: 20px 12px 22px; border-radius: 6px; background: #f6f2ea;
+}
+.adm-colprev__mark {
+  width: 110px; height: 110px; border-radius: 50%; overflow: hidden;
+  display: grid; place-items: center;
+  background: var(--ivory); color: var(--gold-deep); font-size: 32px; font-weight: 300; letter-spacing: 0.04em;
+}
+.adm-colprev__mark img { width: 74%; height: 74%; object-fit: contain; }
+.adm-colprev__name { font-size: 15px; font-weight: 500; font-style: italic; text-decoration: underline; text-underline-offset: 4px; text-align: center; }
+
+@media (max-width: 1100px) {
+  .adm-sig__slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .adm-sig__slots { grid-template-columns: minmax(0, 1fr); }
+}
+.adm-sig .adm-card__head { flex-wrap: wrap; gap: 6px 16px; }
