@@ -15,6 +15,7 @@ export default function CollectionEditor({ collection, watchCount = 0, onClose, 
   const [error, setError] = useState('');
   const [logoMsg, setLogoMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(''); // '' | 'save' | 'delete' while talking to the database
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef(null);
 
@@ -38,10 +39,13 @@ export default function CollectionEditor({ collection, watchCount = 0, onClose, 
     setBusy(false);
   }
 
-  function save(e) {
+  async function save(e) {
     e.preventDefault();
+    if (saving) return;
     setError('');
-    const res = isNew ? addCollection({ title, image }) : updateCollection(collection.id, { title, image });
+    setSaving('save'); // a new logo is uploaded first
+    const res = isNew ? await addCollection({ title, image }) : await updateCollection(collection.id, { title, image });
+    setSaving('');
     if (!res.ok) {
       setError(res.error);
       return;
@@ -50,12 +54,15 @@ export default function CollectionEditor({ collection, watchCount = 0, onClose, 
     onClose();
   }
 
-  function remove() {
+  async function remove() {
+    if (saving) return;
     const note = watchCount
       ? ` Its ${watchCount} watch${watchCount > 1 ? 'es' : ''} will be kept but will have no collection until you choose a new one.`
       : '';
     if (!window.confirm(`Delete the “${collection.title}” collection?${note}`)) return;
-    const res = deleteCollection(collection.id);
+    setSaving('delete');
+    const res = await deleteCollection(collection.id);
+    setSaving('');
     if (!res.ok) {
       setError(res.error);
       return;
@@ -139,11 +146,15 @@ export default function CollectionEditor({ collection, watchCount = 0, onClose, 
 
         <footer className="adm-editor__foot">
           {!isNew && (
-            <button type="button" className="adm-btn adm-btn--danger" onClick={remove}>Delete</button>
+            <button type="button" className="adm-btn adm-btn--danger" onClick={remove} disabled={!!saving}>
+              {saving === 'delete' ? 'Deleting…' : 'Delete'}
+            </button>
           )}
           <span style={{ flex: 1 }} />
           <button type="button" className="adm-btn" onClick={onClose}>Cancel</button>
-          <button type="submit" className="adm-btn adm-btn--gold" disabled={busy}>{isNew ? 'Add collection' : 'Save changes'}</button>
+          <button type="submit" className="adm-btn adm-btn--gold" disabled={busy || !!saving}>
+            {saving === 'save' ? 'Saving…' : isNew ? 'Add collection' : 'Save changes'}
+          </button>
         </footer>
       </form>
     </div>

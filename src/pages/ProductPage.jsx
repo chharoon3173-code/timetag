@@ -4,8 +4,9 @@ import HeartButton from '../components/HeartButton.jsx';
 import QtyStepper from '../components/QtyStepper.jsx';
 import NewArrivals from '../components/NewArrivals.jsx';
 import NotFound from './NotFound.jsx';
+import LoadingState from '../components/LoadingState.jsx';
 import { Arrow, Stars, TruckIcon, ShieldIcon, ReturnIcon } from '../components/Icons.jsx';
-import { addToCart, openCart, useCart, useShopProducts, LOW_STOCK, MAX_PER_ITEM } from '../lib/store.js';
+import { addToCart, openCart, useCart, useCatalogError, useCatalogStatus, useShopProducts, LOW_STOCK, MAX_PER_ITEM } from '../lib/store.js';
 import { href, navigate } from '../lib/router.js';
 import { formatPrice } from '../data/products.js';
 import './ProductPage.css';
@@ -28,6 +29,8 @@ function GalleryImage({ product, slide }) {
 
 export default function ProductPage({ id, wishlist }) {
   const products = useShopProducts();
+  const status = useCatalogStatus();
+  const loadError = useCatalogError();
   const product = products.find((p) => p.id === id);
   const { lines } = useCart();
   const [view, setView] = useState(0);
@@ -51,7 +54,11 @@ export default function ProductPage({ id, wishlist }) {
     return [...others.filter(same), ...others.filter((p) => !same(p))].slice(0, 4);
   }, [products, product]);
 
-  if (!product) return <NotFound title="Watch not found" text="This watch isn’t available right now." />;
+  if (!product) {
+    if (status === 'loading') return <LoadingState text="Loading watch…" />;
+    if (status === 'error') return <LoadingState error={`We couldn’t load this watch. ${loadError}`} />;
+    return <NotFound title="Watch not found" text="This watch isn’t available right now." />;
+  }
 
   const inBag = lines.find((l) => l.id === product.id)?.qty || 0;
   const maxAddable = Math.max(0, Math.min(MAX_PER_ITEM, product.stock) - inBag);

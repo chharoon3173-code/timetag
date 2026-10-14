@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ProductVisual } from '../components/Watch.jsx';
-import { ORDER_STATUSES, updateOrderStatus } from '../lib/store.js';
+import { ORDER_STATUSES, loadOrders, updateOrderStatus, useOrdersStatus } from '../lib/store.js';
 import { STATUS_LABEL, StatusPill, customerName, fmtDate, formatPrice, itemCount } from './shared.jsx';
 
 function downloadCSV(orders) {
@@ -27,18 +27,23 @@ function downloadCSV(orders) {
 }
 
 function StatusSelect({ order }) {
+  const [saving, setSaving] = useState(false);
   const locked = order.status === 'cancelled';
   return (
     <select
       className={`adm-select adm-select--${order.status}`}
       value={order.status}
-      disabled={locked}
+      disabled={locked || saving}
       aria-label={`Status for ${order.id}`}
+      aria-busy={saving}
       onClick={(e) => e.stopPropagation()}
-      onChange={(e) => {
+      onChange={async (e) => {
         const next = e.target.value;
         if (next === 'cancelled' && !window.confirm(`Cancel ${order.id}? Its items will go back into stock. This can't be undone.`)) return;
-        updateOrderStatus(order.id, next);
+        setSaving(true);
+        const res = await updateOrderStatus(order.id, next);
+        setSaving(false);
+        if (!res.ok) window.alert(`Couldn’t change ${order.id}: ${res.error}`);
       }}
     >
       {ORDER_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
@@ -129,6 +134,7 @@ function OrderPanel({ order, catalog, onClose }) {
 }
 
 export default function Orders({ orders, catalog, openId, setOpenId }) {
+  const status = useOrdersStatus();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
 
@@ -153,7 +159,12 @@ export default function Orders({ orders, catalog, openId, setOpenId }) {
     <>
       <header className="adm-head">
         <h1>Orders</h1>
-        <button type="button" className="adm-btn" onClick={() => downloadCSV(shown)} disabled={!shown.length}>Export CSV</button>
+        <div className="adm-head__actions">
+          <button type="button" className="adm-btn" onClick={loadOrders} disabled={status === 'loading'}>
+            {status === 'loading' ? 'Loading…' : 'Refresh'}
+          </button>
+          <button type="button" className="adm-btn" onClick={() => downloadCSV(shown)} disabled={!shown.length}>Export CSV</button>
+        </div>
       </header>
 
       <div className="adm-toolbar">
@@ -169,7 +180,9 @@ export default function Orders({ orders, catalog, openId, setOpenId }) {
 
       <section className="adm-card adm-card--flush">
         {shown.length === 0 ? (
-          <p className="adm-empty">{orders.length ? 'No orders match this filter.' : 'No orders yet.'}</p>
+          <p className="adm-empty">
+            {orders.length ? 'No orders match this filter.' : status === 'loading' ? 'Loading orders…' : 'No orders yet.'}
+          </p>
         ) : (
           <div className="adm-scroll">
             <table className="adm-table">

@@ -1,8 +1,10 @@
 import { ProductVisual } from './Watch.jsx';
 import HeartButton from './HeartButton.jsx';
 import Reveal from './Reveal.jsx';
+import LoadingState from './LoadingState.jsx';
 import { formatPrice } from '../data/products.js';
 import { href } from '../lib/router.js';
+import { useCatalogError, useCatalogStatus } from '../lib/store.js';
 import './TimeTagEdit.css';
 
 /**
@@ -20,18 +22,24 @@ export default function TimeTagEdit({
   showCollection = true,
   empty = <p className="shop__empty">New watches are on their way. Check back soon.</p>,
 }) {
+  const status = useCatalogStatus();
+  const error = useCatalogError();
   return (
     <section className={`section section--ivory shop ${className}`} id={id} aria-labelledby={`${id}-title`}>
       <div className="container">
         <div className="shop__head">
           <Title id={`${id}-title`} className="shop__title">{title}</Title>
-          <span className="shop__count">
-            {products.length} {products.length === 1 ? 'watch' : 'watches'}
-          </span>
+          {(products.length > 0 || status === 'ready') && (
+            <span className="shop__count">
+              {products.length} {products.length === 1 ? 'watch' : 'watches'}
+            </span>
+          )}
         </div>
 
         {products.length === 0 ? (
-          empty
+          status === 'loading' ? <LoadingState inline text="Loading watches…" />
+          : status === 'error' ? <LoadingState inline error={`We couldn’t load the watches. ${error}`} />
+          : empty
         ) : (
           <div className="shop__grid">
             {products.map((p, i) => {

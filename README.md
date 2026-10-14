@@ -18,6 +18,7 @@ npm run preview  # preview the production build
 ```
 timetag/
 ├── index.html                 # page shell, fonts, meta tags
+├── supabase/setup.sql         # database setup: paste into Supabase → SQL Editor → Run
 ├── public/
 │   ├── favicon.png, apple-touch-icon.png
 │   ├── brand/                 # lion + wordmark logos, hero.jpg, collections/ (brand tile logos)
@@ -26,10 +27,11 @@ timetag/
     ├── main.jsx               # React entry point
     ├── App.jsx                # puts all the sections together
     ├── index.css              # colours, fonts, buttons, shared styles
-    ├── data/products.js       # ← products, prices, brand tiles, review list (edit here)
+    ├── data/products.js       # watch drawing styles, default bar text, review list
     ├── hooks/useWishlist.js   # wishlist state, saved in the browser
-    ├── lib/store.js           # cart, orders, stock (swap for a database later)
-    ├── lib/auth.js            # admin login
+    ├── lib/supabase.js        # connection to the database (address + public key)
+    ├── lib/store.js           # loads & saves watches, collections, settings and orders; the bag
+    ├── lib/auth.js            # admin sign-in (Supabase email + password)
     ├── lib/router.js          # page routing (#/product/…, #/checkout, …)
     ├── pages/                 # HomePage, ProductPage, CollectionPage, CheckoutPage, ThankYouPage
     ├── admin/                 # admin login, overview, orders, inventory, collections, settings
@@ -48,6 +50,7 @@ timetag/
         ├── NewArrivals.jsx/.css       "You may also like" row on product pages
         ├── CartDrawer.jsx/.css, checkout/   bag and checkout layout
         ├── Watch.jsx                  vector watch drawing (+ ProductVisual)
+        ├── LoadingState.jsx           "Loading…" / "couldn't load — try again"
         ├── HeartButton.jsx, QtyStepper.jsx, Icons.jsx, Reveal.jsx, Grain.jsx
 ```
 
@@ -64,7 +67,7 @@ timetag/
 
 ## Admin panel
 
-- Log in at `#/admin` with the admin username and password.
+- Sign in at `#/admin` with the admin **email and password** you created in Supabase (see "Database" below).
 - **Overview:** order count, revenue, pending orders, low-stock alerts.
 - **Orders:** filter by status, search, open an order to see the customer and address, change status
   (Pending → Confirmed → Shipped → Delivered, or Cancelled — cancelling puts the stock back), call or
@@ -76,19 +79,39 @@ timetag/
   header (with a live preview), or switch the bar off.
 - **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, price, stock,
   collection (required), description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
-  choose; first photo is the main one; reorder or remove). Photos are resized automatically. **Edit** any
-  watch (including the built-in ones) to add photos or change its text; watches you added can be deleted.
-- The password itself is not in the code — only its SHA-256 fingerprint (see `src/lib/auth.js` for how to change it).
+  choose; first photo is the main one; reorder or remove). Photos are resized and uploaded automatically.
+  **Edit** or **Delete** any watch.
+- New orders appear by themselves (checked every minute), or click **Refresh** on the Orders page.
 
-> ⚠️ **Demo storage.** There is no server yet, so orders, stock and the admin login all live in the
-> browser (`src/lib/store.js`). Orders placed on a customer's phone will **not** reach your admin.
-> Before taking real orders, connect a database (e.g. Supabase or Firebase) — only `src/lib/store.js`
-> and `src/lib/auth.js` need to change.
+## Database (Supabase)
+
+Watches (and their photos), collections (and logos), the Signature picks, the announcement bar and
+**orders** are stored in a Supabase project, so every visitor and every device sees the same data.
+The bag, wishlist and saved checkout details stay on each visitor's own device.
+
+**Security** (all in `supabase/setup.sql`):
+- Anyone can *see* visible watches, collections and settings; only admins can change them.
+- Orders can only be read by admins. Customers create them through `place_order`, which checks stock,
+  takes prices from the database (they can't be changed in the browser) and handles two people buying
+  the last watch at the same moment.
+- Only emails in the `admins` table can use the admin panel.
+
+**Setting it up (once):**
+1. Supabase → **SQL Editor** → New query → paste all of `supabase/setup.sql` → **Run**.
+2. Supabase → **Authentication → Users → Add user → Create new user**: your email + a strong password,
+   tick **Auto Confirm User**.
+3. SQL Editor → run: `insert into public.admins (email) values ('your-email@example.com');` (lowercase)
+4. Sign in at `#/admin`.
+
+The project address and **publishable** key are at the top of `src/lib/supabase.js` (they're meant to
+be public). Never put a *secret* / *service_role* key in the code. If you change the shipping prices,
+change them in both `SHIPPING_METHODS` (`src/lib/store.js`) and `place_order` (`supabase/setup.sql`).
+Free Supabase projects pause after a week with no visitors — click **Restore** in the dashboard if that happens.
 
 ## What works
 
 - **Cart drawer**, product pages, checkout with validation, and a thank-you page
-- **Stock tracking** — orders reduce stock, sold-out watches can't be bought
+- **Stock tracking in the database** — orders reduce stock, sold-out watches can't be bought
 - **All Watches grid** showing every visible watch, and a **Signature Collection** dial of Best Sellers
   (drag the bezel, tap a watch, or use the arrows)
 - **Customer review slider** — tap a review to see it full size
@@ -97,22 +120,12 @@ timetag/
 - **Mobile menu**, sticky header, scroll fade-in animations, hover effects
 - Responsive down to phone width; respects "reduce motion" settings
 
-## Adding products in code (alternative to the admin)
-
-The watches are drawn in code until you have photography. To use a photo:
-
-1. Put the image in `public/images/` (a transparent PNG looks best), e.g. `public/images/chronograph-x1.png`
-2. In `src/data/products.js`, set that product's `image: '/images/chronograph-x1.png'`
-
-The photo replaces the drawing everywhere that product appears.
-
 ## Before going live
 
-- Product names (other than Chronograph X1) and prices are **placeholders**.
+- The 6 demo watches are **placeholders** — delete or hide them in Admin → Inventory once your real watches are in.
 - Social links in `Footer.jsx` point to `#` — add your real profile URLs.
 - The newsletter form doesn't send anywhere yet — see the `TODO` in `Newsletter.jsx`.
 - Bank transfer details on the thank-you page are placeholders — edit `BANK_DETAILS` in `src/pages/ThankYouPage.jsx`.
-- Connect a database so orders reach the admin from every device (see "Demo storage" above).
 
 ## Deploying
 

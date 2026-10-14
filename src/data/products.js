@@ -1,8 +1,8 @@
-// All site content lives here — edit names, prices and images in one place.
+// Site content that isn't in the database: watch drawing styles, default bar text, filters,
+// the review screenshots, and the price format.
 //
-// Each product has a `watch` style used by the <Watch /> drawing.
-// When you have real photography, set `image: '/images/your-photo.png'`
-// (put the file in /public/images) and it will be shown instead of the drawing.
+// Each watch has a drawing style (`watchStyle`) from WATCH_STYLES, used by <Watch /> until
+// it has photos — pick it in Admin → Inventory → Edit.
 
 export const WATCH_STYLES = {
   steelChrono: {
@@ -43,93 +43,8 @@ export const WATCH_STYLES = {
   },
 };
 
-// NOTE: names (other than Chronograph X1) and prices are placeholders.
-export const PRODUCTS = [
-  {
-    id: 'chronograph-x1',
-    name: 'TimeTag Chronograph X1',
-    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
-    badge: 'Best Seller',
-    description: 'Precision engineered for those who make every second count.',
-    price: 64999,
-    stock: 8,                 // starting stock (admin can change it)
-    rating: 5,
-    gender: ['men'],
-    tags: ['best'],
-    watch: WATCH_STYLES.steelChrono,
-    image: null,
-  },
-  {
-    id: 'heritage-classique',
-    name: 'Heritage Classique',
-    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
-    badge: 'Best Seller',
-    description: 'Ivory dial and warm gold — the quiet confidence of a classic.',
-    price: 58500,
-    stock: 5,                 // starting stock (admin can change it)
-    rating: 5,
-    gender: ['women', 'men'],
-    tags: ['best'],
-    watch: WATCH_STYLES.heritageGold,
-    image: null,
-  },
-  {
-    id: 'meridian-automatic',
-    name: 'Meridian Automatic',
-    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
-    badge: 'New Arrival',
-    description: 'A midnight dial that reads like a clear night sky.',
-    price: 72000,
-    stock: 12,                 // starting stock (admin can change it)
-    rating: 5,
-    gender: ['men', 'women'],
-    tags: ['new'],
-    watch: WATCH_STYLES.midnight,
-    image: null,
-  },
-  {
-    id: 'aurelia-34',
-    name: 'Aurelia 34',
-    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
-    badge: 'New Arrival',
-    description: 'Champagne warmth, sized for a refined wrist.',
-    price: 46999,
-    stock: 3,                 // starting stock (admin can change it)
-    rating: 5,
-    gender: ['women'],
-    tags: ['new'],
-    watch: WATCH_STYLES.champagne,
-    image: null,
-  },
-  {
-    id: 'noir-chronograph',
-    name: 'Noir Chronograph',
-    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
-    badge: 'Best Seller',
-    description: 'Blacked-out steel with gold detailing, made for after dark.',
-    price: 54999,
-    stock: 10,                 // starting stock (admin can change it)
-    rating: 5,
-    gender: ['men'],
-    tags: ['best', 'new'],
-    watch: WATCH_STYLES.noir,
-    image: null,
-  },
-  {
-    id: 'verdant-gmt',
-    name: 'Verdant GMT',
-    collectionId: null, // no collection yet: choose one in Admin → Inventory → Edit
-    badge: 'New Arrival',
-    description: 'Forest-green dial, gold case, two time zones at a glance.',
-    price: 89000,
-    stock: 4,                 // starting stock (admin can change it)
-    rating: 5,
-    gender: ['men', 'women'],
-    tags: ['new', 'best'],
-    watch: WATCH_STYLES.verdant,
-    image: null,
-  },
-];
+// The watches themselves now live in the database (Supabase): add and edit them in
+// Admin → Inventory. The 6 demo watches are created by supabase/setup.sql.
 
 // The sliding gold bar above the header. Change it in Admin → Settings; this is the default text.
 export const DEFAULT_ANNOUNCEMENTS = [
@@ -148,19 +63,8 @@ export const FILTERS = [
   { key: 'new', label: 'New Arrivals', test: (p) => p.tags.includes('new') },
 ];
 
-// The starting list of collections (the home page "Shop by Collection" logos, the footer, and the
-// admin's "Collection" dropdown). Once you add, edit or delete a collection in Admin → Collections,
-// the admin's list is used instead of this one.
-// `mark` is the monogram shown when there's no logo; `image` is the logo (files in /public/brand/collections/).
-export const DEFAULT_COLLECTIONS = [
-  { id: 'rolex', title: 'Rolex', mark: 'R', image: 'brand/collections/rolex.png' },
-  { id: 'patek-philippe', title: 'Patek Philippe', mark: 'PP', image: 'brand/collections/patek-philippe.png' },
-  { id: 'hublot', title: 'Hublot', mark: 'H', image: 'brand/collections/hublot.png' },
-  { id: 'cartier', title: 'Cartier', mark: 'C', image: 'brand/collections/cartier.png' },
-  { id: 'bestwin', title: 'Bestwin', mark: 'B', image: 'brand/collections/bestwin.png' },
-  { id: 'automatic', title: 'Automatic Watches', mark: 'A', image: 'brand/collections/automatic.png' },
-  { id: 'master-grade', title: 'Master Grade', mark: 'MG', image: 'brand/collections/master-grade.png' },
-];
+// Collections (Rolex, Cartier…) also live in the database: manage them in Admin → Collections.
+// The starting 7 are created by supabase/setup.sql; their logos are in /public/brand/collections/.
 
 // Real WhatsApp reviews for the "Hear From Our Happy Customers" slider (images in /public/reviews).
 // Customers' full names and profile photos are blurred in the images.
@@ -179,4 +83,4 @@ export const CUSTOMER_REVIEWS = [
   { id: 10, image: 'reviews/review-10.jpg', alt: 'WhatsApp messages in Roman Urdu from a customer who gave the watch to a friend as a gift and says it was an outclass watch.' },
 ];
 
-export const formatPrice =(amount) => `Rs. ${amount.toLocaleString('en-PK')}`;
+export const formatPrice = (amount) => `Rs. ${amount.toLocaleString('en-PK')}`;

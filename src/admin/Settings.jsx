@@ -14,6 +14,7 @@ export default function Settings() {
   const [show, setShow] = useState(saved.show);
   const [messages, setMessages] = useState(saved.messages);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
   const toastTimer = useRef(null);
 
@@ -51,20 +52,30 @@ export default function Settings() {
     requestAnimationFrame(() => document.getElementById(`adm-ann-${messages.length}`)?.focus());
   };
 
-  const save = (e) => {
+  const save = async (e) => {
     e.preventDefault();
-    const res = setAnnouncement({ show, messages });
+    if (saving) return;
+    setSaving(true);
+    const res = await setAnnouncement({ show, messages });
+    setSaving(false);
     if (!res.ok) {
-      setError(res.error);
+      setError(res.error); // your edits stay in the boxes so you can try again
       return;
     }
     setError('');
     notify(show ? 'Announcement bar saved' : 'Announcement bar switched off');
   };
 
-  const reset = () => {
+  const reset = async () => {
+    if (saving) return;
     if (!window.confirm('Go back to the original announcement text? Your messages will be replaced.')) return;
-    resetAnnouncement();
+    setSaving(true);
+    const res = await resetAnnouncement();
+    setSaving(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
     setError('');
     notify('Announcement bar reset to the default text');
   };
@@ -128,7 +139,7 @@ export default function Settings() {
         {error && <p className="adm-save-err" role="alert">{error}</p>}
 
         <div className="adm-ann__foot">
-          <button type="button" className="adm-btn adm-btn--ghost" onClick={reset}>Reset to default text</button>
+          <button type="button" className="adm-btn adm-btn--ghost" onClick={reset} disabled={saving}>Reset to default text</button>
           <span style={{ flex: 1 }} />
           <button
             type="button"
@@ -138,7 +149,7 @@ export default function Settings() {
           >
             Undo changes
           </button>
-          <button type="submit" className="adm-btn adm-btn--gold" disabled={!changed}>Save</button>
+          <button type="submit" className="adm-btn adm-btn--gold" disabled={!changed || saving}>{saving ? 'Saving…' : 'Save'}</button>
         </div>
       </form>
 

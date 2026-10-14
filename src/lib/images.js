@@ -1,6 +1,7 @@
 /**
- * Shrinks a photo in the browser before saving it, so many watches fit in storage.
+ * Shrinks a photo in the browser before uploading it, so pages load fast and storage lasts.
  * Keeps transparency (WebP), falls back to JPEG where WebP isn't supported.
+ * The result is a "data:" address (the picture as text), shown as a preview until it's uploaded.
  */
 export const MAX_PHOTOS = 6;
 const MAX_SIDE = 1100;
@@ -46,3 +47,13 @@ export async function compressImage(file, maxSide = MAX_SIDE) {
 }
 
 export const dataUrlKB = (d) => Math.round((d.length * 3) / 4 / 1024);
+
+/** Turns a "data:" address back into a file (Blob) so it can be uploaded. */
+export function dataUrlToBlob(dataUrl) {
+  const [head, base64] = dataUrl.split(',');
+  const type = head.match(/data:([^;]+)/)?.[1] || 'application/octet-stream';
+  const bytes = atob(base64);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], { type });
+}

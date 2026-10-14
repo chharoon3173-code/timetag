@@ -25,11 +25,11 @@ export default function Collections({ catalog, onOpenInventory }) {
   const picked = slots.filter(Boolean);
   const editingCollection = editing && editing !== 'new' ? collections.find((c) => c.id === editing) : null;
 
-  const pick = (i, id) => {
+  const pick = async (i, id) => {
     const next = [...slots];
     next[i] = id;
-    const res = setSignatureSlots(next);
-    if (!res.ok) return saved(res.error);
+    const res = await setSignatureSlots(next);
+    if (!res.ok) return saved(`Couldn’t save: ${res.error}`);
     const p = catalog.find((x) => x.id === id);
     saved(p ? `Slot ${pad(i + 1)}: ${p.name}` : `Slot ${pad(i + 1)} cleared`);
   };

@@ -1,33 +1,33 @@
 /**
- * TimeTag data store — catalog overrides (stock/price/visibility), collections, the Signature
- * Collection picks, orders and the cart.
+ * TimeTag data store — everything the pages show and change.
  *
- * ⚠️  DEMO STORAGE: everything is saved in the visitor's browser (localStorage).
- *     Orders placed on one device are NOT visible on another. To go live, replace the
- *     functions marked "BACKEND" with calls to a real database (e.g. Supabase / Firebase).
- *     The rest of the app only talks to this file, so nothing else needs to change.
+ * Watches, collections, settings (announcement bar, Signature picks) and orders live in the
+ * Supabase database (see src/lib/supabase.js and supabase/setup.sql). This file loads them,
+ * keeps a copy in memory for the pages, and saves changes back.
+ *
+ * Saving takes a moment and can fail (no internet, signed out…), so every function that
+ * changes something is `async` and returns { ok: true } or { ok: false, error: 'message' }.
+ *
+ * Kept on the visitor's own device (not in the database): the bag, and the orders they placed
+ * on this device (so the thank-you page can show them).
  */
 import { useMemo, useSyncExternalStore } from 'react';
-import { DEFAULT_ANNOUNCEMENTS, DEFAULT_COLLECTIONS, PRODUCTS, WATCH_STYLES } from '../data/products.js';
+import { DEFAULT_ANNOUNCEMENTS, WATCH_STYLES } from '../data/products.js';
+import { auth, db, storage } from './supabase.js';
+import { dataUrlToBlob } from './images.js';
 
 const KEYS = {
-  products: 'timetag:products', // watches added from the admin panel
-  inventory: 'timetag:inventory',
-  orders: 'timetag:orders',
-  cart: 'timetag:cart',
-  collections: 'timetag:collections', // the collection list, once it's been edited in the admin
-  signature: 'timetag:signature', // watch ids picked for the Signature Collection (4 slots)
-  announcement: 'timetag:announcement', // the sliding bar's text, once it's been edited in the admin
+  cart: 'timetag:cart', // [{ id, qty }]
+  myOrders: 'timetag:my-orders', // orders placed on this device
+  cache: 'timetag:catalog-cache', // last loaded watches/collections/settings, for a fast first paint
 };
-
-// What each saved item falls back to when nothing is stored yet.
-// `null` for collections/signature/announcement means "use the defaults".
-const FALLBACKS = { products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null, announcement: null };
 
 export const LOW_STOCK = 3;
 export const MAX_PER_ITEM = 5;
 export const MAX_SIGNATURE = 4; // the home page dial fits 4 watches
 
+// The prices here are only for display — the database (place_order in supabase/setup.sql)
+// decides the real shipping price, so keep the two in sync.
 export const SHIPPING_METHODS = [
   { id: 'standard', label: 'Standard delivery', detail: '3–5 business days', price: 0 },
   { id: 'express', label: 'Express delivery', detail: '1–2 business days', price: 500 },
@@ -40,7 +40,7 @@ export const PAYMENT_METHODS = [
 
 export const ORDER_STATUSES = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
-/* ---------------- persistence helpers ---------------- */
+/* ---------------- saving on this device ---------------- */
 function read(key, fallback) {
   try {
     const raw = window.localStorage.getItem(key);
@@ -58,45 +58,29 @@ function write(key, value) {
 }
 
 /* ---------------- tiny external store ---------------- */
+const cache = read(KEYS.cache, null);
+
 let state = {
-  products: read(KEYS.products, []), // watches added in the admin
-  inventory: read(KEYS.inventory, {}), // { [productId]: { stock, price, active, images, ...edits } }
-  orders: read(KEYS.orders, []),
-  cart: read(KEYS.cart, []), // [{ id, qty }]
-  collections: read(KEYS.collections, null), // [{ id, title, image }] or null = DEFAULT_COLLECTIONS
-  signature: read(KEYS.signature, null), // ['watch-id', '', …] (empty string = empty slot) or null
-  announcement: read(KEYS.announcement, null), // { show, messages: [...] } or null = DEFAULT_ANNOUNCEMENTS
+  // 'loading' (nothing to show yet) | 'ready' | 'error' (couldn't load and nothing cached)
+  status: cache ? 'ready' : 'loading',
+  error: '',
+  products: cache?.products || [], // [{ id, name, collectionId, price, stock, … }]
+  collections: cache?.collections || [], // [{ id, title, image, sort }]
+  settings: cache?.settings || { announcement: null, signature: null },
+  orders: [], // all orders — only loaded for a signed-in admin
+  ordersStatus: 'idle', // 'idle' | 'loading' | 'ready' | 'error'
+  ordersError: '',
+  myOrders: read(KEYS.myOrders, []),
+  cart: read(KEYS.cart, []),
   cartOpen: false,
 };
 const listeners = new Set();
 
-const PERSISTED = ['products', 'inventory', 'orders', 'cart', 'collections', 'signature', 'announcement'];
-
 function setState(patch) {
   state = { ...state, ...patch };
-  for (const k of PERSISTED) if (k in patch) write(KEYS[k], state[k]);
+  if ('cart' in patch) write(KEYS.cart, state.cart);
+  if ('myOrders' in patch) write(KEYS.myOrders, state.myOrders);
   listeners.forEach((l) => l());
-}
-
-/** Like setState, but saves first and reports failure (e.g. browser storage full of photos). */
-function commit(patch) {
-  for (const k of PERSISTED) {
-    if (!(k in patch)) continue;
-    try {
-      window.localStorage.setItem(KEYS[k], JSON.stringify(patch[k]));
-    } catch (e) {
-      const full = e && (e.name === 'QuotaExceededError' || e.code === 22);
-      return {
-        ok: false,
-        error: full
-          ? 'Browser storage is full. Remove some photos or use fewer/smaller images, then try again.'
-          : 'Could not save changes in this browser.',
-      };
-    }
-  }
-  state = { ...state, ...patch };
-  listeners.forEach((l) => l());
-  return { ok: true };
 }
 
 function subscribe(listener) {
@@ -104,116 +88,236 @@ function subscribe(listener) {
   return () => listeners.delete(listener);
 }
 
-// keep several open tabs in sync (e.g. store in one tab, admin in another)
+// keep the bag in sync between open tabs
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
-    const entry = Object.entries(KEYS).find(([, key]) => key === e.key);
-    if (!entry) return;
-    state = { ...state, [entry[0]]: read(e.key, FALLBACKS[entry[0]]) };
-    listeners.forEach((l) => l());
+    if (e.key === KEYS.cart) setState({ cart: read(KEYS.cart, []) });
   });
 }
 
 const useSlice = (pick) => useSyncExternalStore(subscribe, () => pick(state), () => pick(state));
 
+const ok = (extra) => ({ ok: true, ...extra });
+const fail = (e) => ({ ok: false, error: e?.message || String(e) });
+
 const slug = (s, fallback) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || fallback;
+
+/* ---------------- database rows ⇄ what the pages use ---------------- */
+const fromProductRow = (r) => ({
+  id: r.id,
+  name: r.name,
+  collectionId: r.collection_id || null,
+  price: r.price,
+  stock: r.stock,
+  badge: r.badge || '',
+  description: r.description || '',
+  strap: r.strap || '',
+  gender: r.gender || [],
+  tags: r.tags || [],
+  watchStyle: r.watch_style || 'steelChrono',
+  images: r.images || [],
+  active: r.active,
+  rating: r.rating || 5,
+  createdAt: r.created_at,
+});
+
+const PRODUCT_COLUMNS = {
+  name: 'name',
+  collectionId: 'collection_id',
+  price: 'price',
+  stock: 'stock',
+  badge: 'badge',
+  description: 'description',
+  strap: 'strap',
+  gender: 'gender',
+  tags: 'tags',
+  watchStyle: 'watch_style',
+  images: 'images',
+  active: 'active',
+  rating: 'rating',
+};
+function toProductRow(patch) {
+  const row = {};
+  for (const [key, column] of Object.entries(PRODUCT_COLUMNS)) {
+    if (key in patch) row[column] = patch[key] === '' && (key === 'badge' || key === 'strap' || key === 'collectionId') ? null : patch[key];
+  }
+  return row;
+}
+
+const fromCollectionRow = (r) => ({ id: r.id, title: r.title, image: r.image || null, sort: r.sort ?? 0 });
+
+const fromOrderRow = (r) => ({
+  id: r.id,
+  number: r.number,
+  createdAt: r.created_at,
+  status: r.status,
+  customer: r.customer || {},
+  newsletter: !!r.newsletter,
+  shipping: r.shipping,
+  payment: r.payment,
+  items: r.items || [],
+  subtotal: r.subtotal,
+  total: r.total,
+  history: r.history || [],
+});
+
+/* ---------------- loading from the database ---------------- */
+let lastLoad = 0;
+let loading = null;
+
+/** Loads watches, collections and settings. Signed-in admins also get hidden watches. */
+export function loadCatalog() {
+  if (loading) return loading;
+  loading = (async () => {
+    try {
+      const [products, collections, settings] = await Promise.all([
+        db.select('products', 'order=created_at.desc'),
+        db.select('collections', 'order=sort.asc,created_at.asc'),
+        db.select('settings'),
+      ]);
+      const next = {
+        products: products.map(fromProductRow),
+        collections: collections.map(fromCollectionRow),
+        settings: {
+          announcement: settings.find((s) => s.key === 'announcement')?.value ?? null,
+          signature: settings.find((s) => s.key === 'signature')?.value ?? null,
+        },
+      };
+      setState({ ...next, status: 'ready', error: '' });
+      // remember it for next time, minus hidden watches (only admins should see those)
+      write(KEYS.cache, { ...next, products: next.products.filter((p) => p.active) });
+      lastLoad = Date.now();
+    } catch (e) {
+      setState(state.status === 'ready' ? { error: e.message } : { status: 'error', error: e.message });
+    } finally {
+      loading = null;
+    }
+  })();
+  return loading;
+}
+
+if (typeof window !== 'undefined') {
+  loadCatalog();
+  // coming back to the tab after a while: fetch fresh stock and prices
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - lastLoad > 2 * 60 * 1000) loadCatalog();
+  });
+  // signing out: forget the orders and hidden watches
+  auth.onChange((session) => {
+    if (!session) {
+      setState({ orders: [], ordersStatus: 'idle', ordersError: '' });
+      loadCatalog();
+    }
+  });
+}
+
+/** 'loading' | 'ready' | 'error', and the error message if loading failed. */
+export const useCatalogStatus = () => useSlice((s) => s.status);
+export const useCatalogError = () => useSlice((s) => s.error);
+
+/* ---------------- photos & logos ---------------- */
+/** Uploads any new pictures (data: addresses from the photo picker) and returns web addresses. */
+async function uploadImages(folder, images) {
+  return Promise.all(
+    images.map(async (src, i) => {
+      if (!src?.startsWith('data:')) return src; // already uploaded, or a file on the site
+      const blob = dataUrlToBlob(src);
+      const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
+      const name = `${Date.now().toString(36)}-${i}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
+      return storage.upload(`${folder}/${name}`, blob);
+    })
+  );
+}
+/** Deletes pictures that are no longer used (ignores failures — they're only wasted space). */
+const forgetImages = (urls) => storage.removeByUrl(urls).catch(() => {});
 
 /* ---------------- collections ---------------- */
 /** "Master Grade" → "MG". Shown in the circle when a collection has no logo. */
 const initials = (title) =>
   title.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
 
-function listCollections(stored) {
-  return (stored ?? DEFAULT_COLLECTIONS).map((c) => ({ ...c, image: c.image || null, mark: c.mark || initials(c.title) }));
-}
-
 /** The collections, in display order: [{ id, title, image, mark }]. */
 export function useCollections() {
-  const stored = useSlice((s) => s.collections);
-  return useMemo(() => listCollections(stored), [stored]);
+  const list = useSlice((s) => s.collections);
+  return useMemo(() => list.map((c) => ({ ...c, mark: initials(c.title) })), [list]);
 }
 
-export const getCollections = () => listCollections(state.collections);
-
 const titleTaken = (title, exceptId) =>
-  getCollections().some((c) => c.id !== exceptId && c.title.trim().toLowerCase() === title.trim().toLowerCase());
+  state.collections.some((c) => c.id !== exceptId && c.title.trim().toLowerCase() === title.trim().toLowerCase());
 
 /** Adds a collection from the admin. Returns { ok, collection } or { ok: false, error }. */
-export function addCollection({ title, image = null }) {
-  // BACKEND: replace with an API call (and upload the logo to file storage)
+export async function addCollection({ title, image = null }) {
   const name = title.trim();
-  if (!name) return { ok: false, error: 'Enter a collection name.' };
-  if (titleTaken(name)) return { ok: false, error: `You already have a collection called “${name}”.` };
-  const list = getCollections();
-  const taken = new Set(list.map((c) => c.id));
+  if (!name) return fail('Enter a collection name.');
+  if (titleTaken(name)) return fail(`You already have a collection called “${name}”.`);
+  const taken = new Set(state.collections.map((c) => c.id));
   let id = slug(name, 'collection');
   for (let n = 2; taken.has(id); n++) id = `${slug(name, 'collection')}-${n}`;
-  const collection = { id, title: name, image };
-  const res = commit({ collections: [...list.map(({ id, title, image }) => ({ id, title, image })), collection] });
-  return res.ok ? { ok: true, collection } : res;
+  try {
+    const [logo] = image ? await uploadImages('collections', [image]) : [null];
+    const sort = state.collections.reduce((max, c) => Math.max(max, c.sort), 0) + 1;
+    const row = await db.insert('collections', { id, title: name, image: logo, sort });
+    const collection = fromCollectionRow(row);
+    setState({ collections: [...state.collections, collection] });
+    return ok({ collection });
+  } catch (e) {
+    return fail(e);
+  }
 }
 
 /** Renames a collection or changes its logo. Its watches follow automatically. */
-export function updateCollection(id, { title, image }) {
-  // BACKEND: replace with an API call
+export async function updateCollection(id, { title, image }) {
   const name = title.trim();
-  if (!name) return { ok: false, error: 'Enter a collection name.' };
-  if (titleTaken(name, id)) return { ok: false, error: `You already have a collection called “${name}”.` };
-  return commit({
-    collections: getCollections().map((c) => (c.id === id ? { id, title: name, image } : { id: c.id, title: c.title, image: c.image })),
-  });
+  if (!name) return fail('Enter a collection name.');
+  if (titleTaken(name, id)) return fail(`You already have a collection called “${name}”.`);
+  const before = state.collections.find((c) => c.id === id);
+  try {
+    const [logo] = image ? await uploadImages('collections', [image]) : [null];
+    const row = await db.update('collections', { id }, { title: name, image: logo });
+    setState({ collections: state.collections.map((c) => (c.id === id ? fromCollectionRow(row) : c)) });
+    if (before?.image && before.image !== logo) forgetImages([before.image]);
+    return ok();
+  } catch (e) {
+    return fail(e);
+  }
 }
 
 /** Deletes a collection. Its watches are kept and become "No collection". */
-export function deleteCollection(id) {
-  // BACKEND: replace with an API call
-  const clear = (p) => (p.collectionId === id ? { ...p, collectionId: null } : p);
-  const inventory = Object.fromEntries(Object.entries(state.inventory).map(([k, v]) => [k, clear(v)]));
-  return commit({
-    collections: getCollections().filter((c) => c.id !== id).map(({ id, title, image }) => ({ id, title, image })),
-    products: state.products.map(clear),
-    inventory,
-  });
+export async function deleteCollection(id) {
+  const before = state.collections.find((c) => c.id === id);
+  try {
+    await db.remove('collections', { id });
+    setState({
+      collections: state.collections.filter((c) => c.id !== id),
+      products: state.products.map((p) => (p.collectionId === id ? { ...p, collectionId: null } : p)),
+    });
+    if (before?.image) forgetImages([before.image]);
+    return ok();
+  } catch (e) {
+    return fail(e);
+  }
 }
 
 /* ---------------- catalog ---------------- */
-const BUILT_IN_IDS = new Set(PRODUCTS.map((p) => p.id));
-
-function buildCatalog(inventory, custom, collections) {
+function buildCatalog(products, collections) {
   const byId = new Map(collections.map((c) => [c.id, c]));
-  const byTitle = new Map(collections.map((c) => [c.title.toLowerCase(), c]));
-  // Newest admin-added watches first, then the built-in catalogue.
-  return [...custom, ...PRODUCTS].map((p) => {
-    const o = inventory[p.id] || {};
-    const merged = { ...p, ...o };
-    // Watches point to their collection by id. Older watches saved before collections could be
-    // managed only have a name, so match that by name (old names like "The Classics" won't match).
-    const col =
-      merged.collectionId !== undefined
-        ? byId.get(merged.collectionId)
-        : byTitle.get(String(merged.collection || '').toLowerCase());
+  return products.map((p) => {
+    const col = p.collectionId ? byId.get(p.collectionId) : null;
     return {
-      ...merged,
+      ...p,
       collectionId: col ? col.id : null,
       collection: col ? col.title : '', // the name shown on the site ('' = no collection)
-      custom: !BUILT_IN_IDS.has(p.id),
-      images: merged.images || (merged.image ? [merged.image] : []),
-      watch: WATCH_STYLES[merged.watchStyle] || p.watch || WATCH_STYLES.steelChrono,
-      stock: merged.stock ?? 0,
-      active: merged.active ?? true,
-      gender: merged.gender || ['men', 'women'],
-      tags: merged.tags || [],
+      watch: WATCH_STYLES[p.watchStyle] || WATCH_STYLES.steelChrono, // drawing used until there are photos
     };
   });
 }
 
-/** All products (including hidden) with live stock/price. */
+/** All products (admins also get hidden ones) with live stock and price. */
 export function useCatalog() {
-  const inventory = useSlice((s) => s.inventory);
-  const custom = useSlice((s) => s.products);
-  const collections = useCollections();
-  return useMemo(() => buildCatalog(inventory, custom, collections), [inventory, custom, collections]);
+  const products = useSlice((s) => s.products);
+  const collections = useSlice((s) => s.collections);
+  return useMemo(() => buildCatalog(products, collections), [products, collections]);
 }
 
 /** Products visible in the shop. */
@@ -222,8 +326,86 @@ export function useShopProducts() {
   return useMemo(() => all.filter((p) => p.active), [all]);
 }
 
-export function getCatalog() {
-  return buildCatalog(state.inventory, state.products, getCollections());
+const getCatalog = () => buildCatalog(state.products, state.collections);
+
+// Changes to the same watch are saved one after another (e.g. typing "12" in the stock box
+// sends "1" then "12" — the "12" must win).
+const queues = new Map();
+function inOrder(id, task) {
+  const run = (queues.get(id) || Promise.resolve()).catch(() => {}).then(task);
+  queues.set(id, run);
+  return run;
+}
+
+/** Saves edits to a watch (price, stock, photos, text…). Returns { ok, error? }. */
+export async function updateProduct(id, patch) {
+  const before = state.products.find((p) => p.id === id);
+  if (!before) return fail('This watch no longer exists.');
+  const replace = (p) => setState({ products: state.products.map((x) => (x.id === id ? p : x)) });
+  replace({ ...before, ...patch }); // show the change straight away…
+  try {
+    const row = await inOrder(id, async () => {
+      const images = patch.images ? await uploadImages(`products/${id}`, patch.images) : undefined;
+      return db.update('products', { id }, toProductRow({ ...patch, ...(images && { images }) }));
+    });
+    const saved = fromProductRow(row);
+    replace(saved);
+    if (patch.images) forgetImages(before.images.filter((u) => !saved.images.includes(u)));
+    return ok();
+  } catch (e) {
+    replace(before); // …and undo it if saving failed
+    return fail(e);
+  }
+}
+
+/** Adds a new watch from the admin. Returns { ok, product } or { ok: false, error }. */
+export async function addProduct(data) {
+  const taken = new Set(state.products.map((p) => p.id));
+  let id = slug(data.name, 'watch');
+  for (let n = 2; taken.has(id); n++) id = `${slug(data.name, 'watch')}-${n}`;
+  try {
+    const images = await uploadImages(`products/${id}`, data.images || []);
+    const row = await db.insert('products', { id, ...toProductRow({ ...data, images }) });
+    const product = fromProductRow(row);
+    setState({ products: [product, ...state.products] });
+    return ok({ product });
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Permanently deletes a watch (past orders keep their copy of its name and price). */
+export async function deleteProduct(id) {
+  const before = state.products.find((p) => p.id === id);
+  try {
+    await db.remove('products', { id });
+    setState({ products: state.products.filter((p) => p.id !== id), cart: state.cart.filter((l) => l.id !== id) });
+    if (before) forgetImages(before.images);
+    // free its Signature Collection slot, if it had one
+    const slots = state.settings.signature || [];
+    if (slots.includes(id)) await setSignatureSlots(slots.map((s) => (s === id ? '' : s)));
+    return ok();
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/* ---------------- settings ---------------- */
+/**
+ * Saves one setting. `showFirst`: update the page straight away and undo it if saving fails
+ * (good for quick picks); otherwise the page only changes once it's saved.
+ */
+async function saveSetting(key, value, { showFirst = false } = {}) {
+  const before = state.settings[key];
+  if (showFirst) setState({ settings: { ...state.settings, [key]: value } });
+  try {
+    await db.upsert('settings', { key, value, updated_at: new Date().toISOString() }, 'key');
+    if (!showFirst) setState({ settings: { ...state.settings, [key]: value } });
+    return ok();
+  } catch (e) {
+    if (showFirst) setState({ settings: { ...state.settings, [key]: before } });
+    return fail(e);
+  }
 }
 
 /* ---------------- announcement bar ---------------- */
@@ -233,26 +415,25 @@ const DEFAULT_ANNOUNCEMENT = { show: true, messages: DEFAULT_ANNOUNCEMENTS };
 
 /** The sliding bar above the header: { show, messages }. */
 export function useAnnouncement() {
-  return useSlice((s) => s.announcement) || DEFAULT_ANNOUNCEMENT;
+  return useSlice((s) => s.settings.announcement) || DEFAULT_ANNOUNCEMENT;
 }
 
 /** Saves the bar's text from the admin. Empty lines are dropped. Returns { ok, error? }. */
 export function setAnnouncement({ show, messages }) {
-  // BACKEND: replace with an API call
   const clean = messages.map((m) => m.trim().slice(0, MAX_ANNOUNCEMENT_LENGTH)).filter(Boolean).slice(0, MAX_ANNOUNCEMENTS);
-  if (show && !clean.length) return { ok: false, error: 'Add at least one message, or switch the bar off.' };
-  return commit({ announcement: { show: !!show, messages: clean } });
+  if (show && !clean.length) return Promise.resolve(fail('Add at least one message, or switch the bar off.'));
+  return saveSetting('announcement', { show: !!show, messages: clean });
 }
 
 /** Goes back to the default text (DEFAULT_ANNOUNCEMENTS in data/products.js). */
-export const resetAnnouncement = () => commit({ announcement: null });
+export const resetAnnouncement = () => saveSetting('announcement', DEFAULT_ANNOUNCEMENT);
 
 /* ---------------- Signature Collection ---------------- */
 const NO_PICKS = [];
 
 /** The 4 slots picked in the admin: ['watch-id', '', …] ('' = empty slot). */
 export function useSignatureSlots() {
-  const stored = useSlice((s) => s.signature);
+  const stored = useSlice((s) => s.settings.signature);
   return useMemo(
     () => Array.from({ length: MAX_SIGNATURE }, (_, i) => (stored || NO_PICKS)[i] || ''),
     [stored]
@@ -261,8 +442,7 @@ export function useSignatureSlots() {
 
 /** Saves the Signature Collection slots (up to 4 watch ids, '' for empty). */
 export function setSignatureSlots(slots) {
-  // BACKEND: replace with an API call
-  return commit({ signature: slots.slice(0, MAX_SIGNATURE).map((id) => id || '') });
+  return saveSetting('signature', slots.slice(0, MAX_SIGNATURE).map((id) => id || ''), { showFirst: true });
 }
 
 /**
@@ -280,46 +460,7 @@ export function useSignatureProducts() {
   }, [products, slots]);
 }
 
-/** Saves edits to any watch (price, stock, photos, text…). Returns { ok, error? }. */
-export function updateProduct(id, patch) {
-  // BACKEND: replace with an API call
-  const current = state.inventory[id] || {};
-  return commit({ inventory: { ...state.inventory, [id]: { ...current, ...patch } } });
-}
-
-/** Adds a new watch from the admin. Returns { ok, product } or { ok: false, error }. */
-export function addProduct(data) {
-  // BACKEND: replace with an API call (and upload photos to file storage)
-  const taken = new Set(getCatalog().map((p) => p.id));
-  let id = slug(data.name, 'watch');
-  for (let n = 2; taken.has(id); n++) id = `${slug(data.name, 'watch')}-${n}`;
-  const product = { rating: 5, active: true, ...data, id, createdAt: new Date().toISOString() };
-  const res = commit({ products: [product, ...state.products] });
-  return res.ok ? { ok: true, product } : res;
-}
-
-/** Permanently removes a watch that was added in the admin (built-in watches can only be hidden). */
-export function deleteProduct(id) {
-  if (BUILT_IN_IDS.has(id)) return { ok: false, error: 'Built-in watches can be hidden, not deleted.' };
-  const inventory = { ...state.inventory };
-  delete inventory[id];
-  return commit({
-    products: state.products.filter((p) => p.id !== id),
-    inventory,
-    cart: state.cart.filter((l) => l.id !== id),
-    // free its Signature Collection slot, if it had one
-    ...(state.signature?.includes(id) && { signature: state.signature.map((s) => (s === id ? '' : s)) }),
-  });
-}
-
-/** Approximate browser storage used by the shop, in bytes. */
-export function storageUsed() {
-  let bytes = 0;
-  for (const key of Object.values(KEYS)) bytes += (window.localStorage.getItem(key) || '').length * 2;
-  return bytes;
-}
-
-/* ---------------- cart ---------------- */
+/* ---------------- cart (kept on this device) ---------------- */
 export function useCart() {
   const cart = useSlice((s) => s.cart);
   const catalog = useCatalog();
@@ -366,91 +507,69 @@ export const removeFromCart = (id) => setState({ cart: state.cart.filter((l) => 
 export const clearCart = () => setState({ cart: [] });
 
 /* ---------------- orders ---------------- */
-export function useOrders() {
-  return useSlice((s) => s.orders);
+/** All orders (signed-in admin only), newest first. */
+export const useOrders = () => useSlice((s) => s.orders);
+export const useOrdersStatus = () => useSlice((s) => s.ordersStatus);
+export const useOrdersError = () => useSlice((s) => s.ordersError);
+
+/** One order: from the admin's list, or one placed on this device (for the thank-you page). */
+export function useOrder(id) {
+  const orders = useSlice((s) => s.orders);
+  const mine = useSlice((s) => s.myOrders);
+  return orders.find((o) => o.id === id) || mine.find((o) => o.id === id) || null;
 }
 
-export function useOrder(id) {
-  const orders = useOrders();
-  return orders.find((o) => o.id === id) || null;
+/** Loads all orders. Only works for a signed-in admin (the security rules hide them otherwise). */
+export async function loadOrders() {
+  if (!auth.session()) return fail('Sign in to see orders.');
+  if (state.ordersStatus !== 'ready') setState({ ordersStatus: 'loading' });
+  try {
+    const rows = await db.select('orders', 'order=created_at.desc');
+    setState({ orders: rows.map(fromOrderRow), ordersStatus: 'ready', ordersError: '' });
+    return ok();
+  } catch (e) {
+    setState({ ordersStatus: state.ordersStatus === 'ready' ? 'ready' : 'error', ordersError: e.message });
+    return fail(e);
+  }
 }
 
 /**
- * Creates an order from the current cart. Returns { ok, order } or { ok: false, error }.
- * BACKEND: in production this must happen on a server so stock and totals can't be faked.
+ * Places an order for what's in the bag. The database checks stock, takes the prices from the
+ * watches table and saves it (place_order in supabase/setup.sql).
+ * Returns { ok, order } or { ok: false, error }.
  */
-export function placeOrder({ customer, shippingId, paymentId, newsletter }) {
-  const catalog = getCatalog();
-  const lines = state.cart
-    .map((l) => ({ line: l, product: catalog.find((p) => p.id === l.id) }))
-    .filter((x) => x.product && x.product.active);
-
-  if (!lines.length) return { ok: false, error: 'Your bag is empty.' };
-  for (const { line, product } of lines) {
-    if (line.qty > product.stock) {
-      return { ok: false, error: `Sorry — only ${product.stock} left of ${product.name}. Please update your bag.` };
-    }
+export async function placeOrder({ customer, shippingId, paymentId, newsletter }) {
+  const items = state.cart
+    .filter((l) => state.products.some((p) => p.id === l.id && p.active))
+    .map((l) => ({ id: l.id, qty: l.qty }));
+  if (!items.length) return fail('Your bag is empty.');
+  try {
+    const row = await db.rpc('place_order', {
+      items,
+      customer,
+      shipping_id: shippingId,
+      payment_id: paymentId,
+      newsletter: !!newsletter,
+    });
+    const order = fromOrderRow(row);
+    setState({ myOrders: [order, ...state.myOrders].slice(0, 20), cart: [] });
+    loadCatalog(); // fresh stock for everyone browsing on this device
+    return ok({ order });
+  } catch (e) {
+    loadCatalog(); // e.g. "only 1 left" — show the real stock now
+    return fail(e);
   }
-
-  const shipping = SHIPPING_METHODS.find((m) => m.id === shippingId) || SHIPPING_METHODS[0];
-  const payment = PAYMENT_METHODS.find((m) => m.id === paymentId) || PAYMENT_METHODS[0];
-  const items = lines.map(({ line, product }) => ({
-    id: product.id,
-    name: product.name,
-    collection: product.collection,
-    price: product.price,
-    qty: line.qty,
-  }));
-  const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-  const lastNumber = state.orders.reduce((n, o) => Math.max(n, o.number), 1000);
-  const number = lastNumber + 1;
-
-  const order = {
-    id: `TT-${number}`,
-    number,
-    createdAt: new Date().toISOString(),
-    status: 'pending',
-    customer,
-    newsletter: !!newsletter,
-    shipping: { id: shipping.id, label: shipping.label, detail: shipping.detail, price: shipping.price },
-    payment: { id: payment.id, label: payment.label },
-    items,
-    subtotal,
-    total: subtotal + shipping.price,
-  };
-
-  const inventory = { ...state.inventory };
-  for (const item of items) {
-    const p = catalog.find((x) => x.id === item.id);
-    inventory[item.id] = { ...(inventory[item.id] || {}), stock: p.stock - item.qty };
-  }
-
-  setState({ orders: [order, ...state.orders], inventory, cart: [] });
-  return { ok: true, order };
 }
 
-/** Changes an order's status. Cancelling puts the items back into stock. */
-export function updateOrderStatus(id, status) {
-  const order = state.orders.find((o) => o.id === id);
-  if (!order || order.status === status) return;
-  if (order.status === 'cancelled') return; // cancelled orders are final
-
-  let inventory = state.inventory;
-  if (status === 'cancelled') {
-    inventory = { ...inventory };
-    const catalog = getCatalog();
-    for (const item of order.items) {
-      const p = catalog.find((x) => x.id === item.id);
-      if (p) inventory[item.id] = { ...(inventory[item.id] || {}), stock: p.stock + item.qty };
-    }
+/** Changes an order's status (admin). Cancelling puts the watches back into stock. */
+export async function updateOrderStatus(id, status) {
+  try {
+    const row = await db.rpc('set_order_status', { order_id: id, new_status: status });
+    const order = fromOrderRow(row);
+    setState({ orders: state.orders.map((o) => (o.id === id ? order : o)) });
+    if (status === 'cancelled') loadCatalog(); // stock went back up
+    return ok({ order });
+  } catch (e) {
+    return fail(e);
   }
-  const orders = state.orders.map((o) =>
-    o.id === id ? { ...o, status, history: [...(o.history || []), { status, at: new Date().toISOString() }] } : o
-  );
-  setState({ orders, inventory });
-}
-
-/** Clears all demo orders, stock changes, collection edits, Signature picks and bar text in this browser. */
-export function resetDemoData() {
-  setState({ products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null, announcement: null });
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckoutShell, OrderSummary } from '../components/checkout/CheckoutShell.jsx';
-import { PAYMENT_METHODS, SHIPPING_METHODS, placeOrder, useCart } from '../lib/store.js';
+import { PAYMENT_METHODS, SHIPPING_METHODS, placeOrder, useCart, useCatalogStatus } from '../lib/store.js';
 import { href, navigate } from '../lib/router.js';
 import { formatPrice } from '../data/products.js';
 
@@ -58,6 +58,7 @@ function Field({ id, label, value, onChange, error, className = '', type = 'text
 
 export default function CheckoutPage() {
   const { lines, subtotal } = useCart();
+  const catalogStatus = useCatalogStatus(); // the watches in the bag are looked up in the database
   const [form, setForm] = useState(loadSaved);
   const [newsletter, setNewsletter] = useState(false);
   const [saveInfo, setSaveInfo] = useState(true);
@@ -84,8 +85,9 @@ export default function CheckoutPage() {
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setSubmitError('');
     const found = validate(form);
     setErrors(found);
@@ -95,7 +97,7 @@ export default function CheckoutPage() {
     }
     setSubmitting(true);
     const customer = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, v.trim()]));
-    const result = placeOrder({ customer, shippingId, paymentId, newsletter });
+    const result = await placeOrder({ customer, shippingId, paymentId, newsletter }); // the database checks stock and prices
     if (!result.ok) {
       setSubmitting(false);
       setSubmitError(result.error);
@@ -109,6 +111,16 @@ export default function CheckoutPage() {
     }
     navigate(`/thank-you/${result.order.id}`);
   };
+
+  if (!lines.length && catalogStatus === 'loading') {
+    return (
+      <CheckoutShell
+        summaryTotal="…"
+        main={<div className="co-empty"><p>Loading your bag…</p></div>}
+        summary={<OrderSummary lines={[]} subtotal={0} shipping={null} total={0} />}
+      />
+    );
+  }
 
   if (!lines.length) {
     return (

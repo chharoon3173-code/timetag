@@ -55,6 +55,7 @@ export default function ProductEditor({ product, onClose, onSaved }) {
   const [busy, setBusy] = useState(false);
   const [photoMsg, setPhotoMsg] = useState('');
   const [saveError, setSaveError] = useState('');
+  const [saving, setSaving] = useState(''); // '' | 'save' | 'delete' while talking to the database
   const [dragOver, setDragOver] = useState(false);
   const fileRef = useRef(null);
 
@@ -119,8 +120,9 @@ export default function ProductEditor({ product, onClose, onSaved }) {
     return e;
   }
 
-  function save(e) {
+  async function save(e) {
     e.preventDefault();
+    if (saving) return;
     setSaveError('');
     const found = validate();
     setErrors(found);
@@ -140,7 +142,9 @@ export default function ProductEditor({ product, onClose, onSaved }) {
       images: f.images,
       active: f.active,
     };
-    const res = isNew ? addProduct(data) : updateProduct(product.id, data);
+    setSaving('save'); // new photos are uploaded first, so this can take a few seconds
+    const res = isNew ? await addProduct(data) : await updateProduct(product.id, data);
+    setSaving('');
     if (!res.ok) {
       setSaveError(res.error);
       return;
@@ -149,9 +153,12 @@ export default function ProductEditor({ product, onClose, onSaved }) {
     onClose();
   }
 
-  function remove() {
-    if (!window.confirm(`Delete “${product.name}” permanently? This can’t be undone.`)) return;
-    const res = deleteProduct(product.id);
+  async function remove() {
+    if (saving) return;
+    if (!window.confirm(`Delete “${product.name}” permanently? This can’t be undone. Past orders keep their own copy of its name and price.`)) return;
+    setSaving('delete');
+    const res = await deleteProduct(product.id);
+    setSaving('');
     if (!res.ok) {
       setSaveError(res.error);
       return;
@@ -160,7 +167,8 @@ export default function ProductEditor({ product, onClose, onSaved }) {
     onClose();
   }
 
-  const totalKB = f.images.reduce((n, d) => n + dataUrlKB(d), 0);
+  // photos picked but not uploaded yet are "data:" addresses
+  const newKB = f.images.filter((d) => d.startsWith('data:')).reduce((n, d) => n + dataUrlKB(d), 0);
 
   return (
     <div className="adm-panel-wrap" onClick={onClose}>
@@ -218,7 +226,11 @@ export default function ProductEditor({ product, onClose, onSaved }) {
               </label>
             </div>
           )}
-          {f.images.length > 0 && <p className="adm-note">Photos are resized automatically · {totalKB} KB total</p>}
+          {f.images.length > 0 && (
+            <p className="adm-note">
+              Photos are resized automatically{newKB > 0 && ` · ${newKB} KB to upload when you save`}
+            </p>
+          )}
         </section>
 
         {/* ---- Details ---- */}
@@ -288,12 +300,16 @@ export default function ProductEditor({ product, onClose, onSaved }) {
         {saveError && <p className="adm-save-err" role="alert">{saveError}</p>}
 
         <footer className="adm-editor__foot">
-          {!isNew && product.custom && (
-            <button type="button" className="adm-btn adm-btn--danger" onClick={remove}>Delete</button>
+          {!isNew && (
+            <button type="button" className="adm-btn adm-btn--danger" onClick={remove} disabled={!!saving}>
+              {saving === 'delete' ? 'Deleting…' : 'Delete'}
+            </button>
           )}
           <span style={{ flex: 1 }} />
           <button type="button" className="adm-btn" onClick={onClose}>Cancel</button>
-          <button type="submit" className="adm-btn adm-btn--gold" disabled={busy}>{isNew ? 'Add watch' : 'Save changes'}</button>
+          <button type="submit" className="adm-btn adm-btn--gold" disabled={busy || !!saving}>
+            {saving === 'save' ? 'Saving…' : isNew ? 'Add watch' : 'Save changes'}
+          </button>
         </footer>
       </form>
     </div>

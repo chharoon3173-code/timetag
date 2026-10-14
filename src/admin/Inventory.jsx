@@ -1,9 +1,15 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ProductVisual } from '../components/Watch.jsx';
 import ProductEditor from './ProductEditor.jsx';
-import { LOW_STOCK, resetDemoData, storageUsed, updateProduct } from '../lib/store.js';
+import { LOW_STOCK, updateProduct } from '../lib/store.js';
 import { href } from '../lib/router.js';
 import { formatPrice } from './shared.jsx';
+
+/** Saves one change to a watch and reports the result in the toast. */
+async function save(product, patch, message, onSaved) {
+  const res = await updateProduct(product.id, patch);
+  onSaved(res.ok ? message : `Couldn’t save ${product.name}: ${res.error}`);
+}
 
 function PriceInput({ product, onSaved }) {
   const [value, setValue] = useState(String(product.price));
@@ -13,10 +19,7 @@ function PriceInput({ product, onSaved }) {
       setValue(String(product.price));
       return;
     }
-    if (n !== product.price) {
-      updateProduct(product.id, { price: n });
-      onSaved(`${product.name}: price set to ${formatPrice(n)}`);
-    }
+    if (n !== product.price) save(product, { price: n }, `${product.name}: price set to ${formatPrice(n)}`, onSaved);
   };
   return (
     <div className="adm-money">
@@ -37,8 +40,7 @@ function PriceInput({ product, onSaved }) {
 function StockControl({ product, onSaved }) {
   const set = (n) => {
     const v = Math.max(0, Math.min(9999, n));
-    updateProduct(product.id, { stock: v });
-    onSaved(`${product.name}: stock set to ${v}`);
+    save(product, { stock: v }, `${product.name}: stock set to ${v}`, onSaved);
   };
   return (
     <div className="adm-stock">
@@ -55,27 +57,14 @@ function StockControl({ product, onSaved }) {
   );
 }
 
-const STORAGE_LIMIT_MB = 5; // typical browser limit for one website
-
-function StorageMeter() {
-  const mb = storageUsed() / 1024 / 1024;
-  const pct = Math.min(100, (mb / STORAGE_LIMIT_MB) * 100);
-  return (
-    <div className="adm-meter" title="Photos and orders are stored in this browser until a database is connected">
-      <span>Browser storage</span>
-      <div className="adm-meter__bar"><i style={{ width: `${pct}%` }} className={pct > 80 ? 'is-high' : ''} /></div>
-      <small>{mb.toFixed(1)} of ~{STORAGE_LIMIT_MB} MB</small>
-    </div>
-  );
-}
-
 export default function Inventory({ catalog }) {
   const [toast, setToast] = useState('');
   const [editing, setEditing] = useState(null); // null | 'new' | product id
+  const toastTimer = useRef(null); // kept between renders, so a new message cancels the old one's timer
   const saved = (msg) => {
     setToast(msg);
-    clearTimeout(saved.t);
-    saved.t = setTimeout(() => setToast(''), 2200);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(''), msg.startsWith('Couldn’t') ? 6000 : 2200);
   };
 
   return (
@@ -83,25 +72,10 @@ export default function Inventory({ catalog }) {
       <header className="adm-head">
         <h1>Inventory <span className="adm-count">{catalog.length} watches</span></h1>
         <div className="adm-head__actions">
-        <button type="button" className="adm-btn adm-btn--gold" onClick={() => setEditing('new')}>+ Add watch</button>
-        <button
-          type="button"
-          className="adm-btn adm-btn--ghost"
-          onClick={() => {
-            if (window.confirm('Reset everything in this browser? This removes watches you added, test orders, and all stock/price changes.')) {
-              resetDemoData();
-              saved('Demo data reset');
-            }
-          }}
-        >
-          Reset demo data
-        </button>
+          <button type="button" className="adm-btn adm-btn--gold" onClick={() => setEditing('new')}>+ Add watch</button>
         </div>
       </header>
-      <div className="adm-subbar">
-        <p className="adm-hint">Price, stock and visibility save instantly. Click <strong>Edit</strong> to change photos, name or description.</p>
-        <StorageMeter />
-      </div>
+      <p className="adm-hint">Price, stock and visibility save straight away. Click <strong>Edit</strong> to change photos, name, collection or description.</p>
 
       <section className="adm-card adm-card--flush">
         <div className="adm-scroll">
@@ -117,7 +91,7 @@ export default function Inventory({ catalog }) {
                         <span className="adm-thumb"><ProductVisual product={p} /></span>
                         <span>
                           <a href={href(`/product/${p.id}`)} target="_blank" rel="noreferrer">{p.name}</a>
-                          <small>{p.collection || <span className="adm-nocol">No collection</span>}{p.custom && ' · added by you'}{p.images.length > 0 && ` · ${p.images.length} photo${p.images.length > 1 ? 's' : ''}`}</small>
+                          <small>{p.collection || <span className="adm-nocol">No collection</span>}{p.images.length > 0 && ` · ${p.images.length} photo${p.images.length > 1 ? 's' : ''}`}</small>
                         </span>
                       </div>
                     </td>
@@ -129,10 +103,7 @@ export default function Inventory({ catalog }) {
                         <input
                           type="checkbox"
                           checked={p.active}
-                          onChange={(e) => {
-                            updateProduct(p.id, { active: e.target.checked });
-                            saved(`${p.name} is now ${e.target.checked ? 'visible' : 'hidden'}`);
-                          }}
+                          onChange={(e) => save(p, { active: e.target.checked }, `${p.name} is now ${e.target.checked ? 'visible' : 'hidden'}`, saved)}
                         />
                         <span aria-hidden="true" />
                         <em className="sr-only">Show {p.name} in store</em>

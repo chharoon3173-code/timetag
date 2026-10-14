@@ -390,3 +390,34 @@ a {
 .arrivals::-webkit-scrollbar { height: 4px; }
 .collections::-webkit-scrollbar-thumb,
 .arrivals::-webkit-scrollbar-thumb { background: rgba(201, 169, 110, 0.55); border-radius: 2px; }
+
+/* ---------- Loading / couldn't load (LoadingState.jsx) ---------- */
+.loading-state {
+  min-height: 55vh;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.loading-state--inline { min-height: 0; padding: 48px 0; }
+.loading-state--inline .container { padding: 0; }
+.loading-state p {
+  margin: 0 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--mute);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+.loading-state .container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.loading-state__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  border-right-color: transparent;
+  animation: loading-spin 0.9s linear infinite;
+}
+@keyframes loading-spin { to { transform: rotate(360deg); } }
+.section--ivory .loading-state p { color: var(--mute-dark); }
+.loading-state button.text-link { background: none; border-width: 0 0 1px; cursor: pointer; font: inherit; }

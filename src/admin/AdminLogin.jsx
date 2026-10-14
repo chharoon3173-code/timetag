@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { login } from '../lib/auth.js';
 import { href } from '../lib/router.js';
 
-export default function AdminLogin({ onSuccess }) {
-  const [username, setUsername] = useState('');
+/** Admin sign-in with the email + password created in Supabase (Authentication → Users). */
+export default function AdminLogin() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [error, setError] = useState('');
@@ -11,15 +12,15 @@ export default function AdminLogin({ onSuccess }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
-      setError('Enter your username and password.');
+    if (!email.trim() || !password) {
+      setError('Enter your email and password.');
       return;
     }
     setBusy(true);
-    const res = await login(username, password);
-    setBusy(false);
-    if (res.ok) onSuccess();
-    else {
+    setError('');
+    const res = await login(email, password); // on success the admin panel opens by itself
+    if (!res.ok) {
+      setBusy(false);
       setError(res.error);
       setPassword('');
     }
@@ -33,8 +34,8 @@ export default function AdminLogin({ onSuccess }) {
           <h1>TimeTag Admin</h1>
           <p>Sign in to manage orders and inventory.</p>
         </div>
-        <label className="adm-label" htmlFor="adm-user">Username</label>
-        <input id="adm-user" className="adm-input" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
+        <label className="adm-label" htmlFor="adm-email">Email</label>
+        <input id="adm-email" className="adm-input" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus />
         <label className="adm-label" htmlFor="adm-pass">Password</label>
         <div className="adm-pass">
           <input id="adm-pass" className="adm-input" type={show ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />

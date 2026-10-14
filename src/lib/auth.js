@@ -1,71 +1,40 @@
 /**
- * Admin login.
+ * Admin sign-in, through Supabase (email + password).
  *
- * The password is NOT stored in the code — only its SHA-256 fingerprint.
- * To change the password, run this in any browser console and paste the result below:
- *   crypto.subtle.digest('SHA-256', new TextEncoder().encode('NEW_PASSWORD'))
- *     .then(b => console.log([...new Uint8Array(b)].map(x => x.toString(16).padStart(2,'0')).join('')))
- *
- * ⚠️  Without a server, this check runs in the visitor's browser, so it keeps casual
- *     visitors out but is not real security. Move login to a backend before storing
- *     real customer data.
+ * Your admin account is created in the Supabase dashboard (Authentication → Users), and its email
+ * must be in the `admins` table — see the end of supabase/setup.sql. Signing in with any other
+ * account is refused, and the database's security rules block it anyway.
  */
-const ADMIN_USERNAME = 'haroonscales';
-const ADMIN_PASSWORD_SHA256 = '28cd33a90d61efa9ce6733201b44344074717b401d8517a82128152a56fb8054';
+import { useSyncExternalStore } from 'react';
+import { auth, db } from './supabase.js';
+import { loadCatalog, loadOrders } from './store.js';
 
-const SESSION_KEY = 'timetag:admin-session';
-const LOCK_KEY = 'timetag:admin-lock';
-const SESSION_HOURS = 8;
-const MAX_ATTEMPTS = 5;
-const LOCK_SECONDS = 60;
+export const isLoggedIn = () => !!auth.session();
 
-async function sha256(text) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+/** The signed-in admin's session ({ user: { email } }) or null; updates when it changes. */
+export function useAdminSession() {
+  return useSyncExternalStore(auth.onChange, auth.session, auth.session);
 }
 
-function readJSON(storage, key) {
+export async function login(email, password) {
+  const address = email.trim().toLowerCase();
+  if (!address || !password) return { ok: false, error: 'Enter your email and password.' };
   try {
-    return JSON.parse(storage.getItem(key)) || null;
-  } catch {
-    return null;
-  }
-}
-
-export function isLoggedIn() {
-  const s = readJSON(window.sessionStorage, SESSION_KEY);
-  return !!s && s.expires > Date.now();
-}
-
-/** Seconds left on a lockout after too many wrong attempts (0 = not locked). */
-export function lockSecondsLeft() {
-  const l = readJSON(window.localStorage, LOCK_KEY);
-  if (!l?.until) return 0;
-  return Math.max(0, Math.ceil((l.until - Date.now()) / 1000));
-}
-
-export async function login(username, password) {
-  if (lockSecondsLeft() > 0) return { ok: false, error: `Too many attempts. Try again in ${lockSecondsLeft()}s.` };
-  if (!window.crypto?.subtle) return { ok: false, error: 'Login needs a secure (https) connection.' };
-
-  const ok = username.trim().toLowerCase() === ADMIN_USERNAME && (await sha256(password)) === ADMIN_PASSWORD_SHA256;
-
-  if (ok) {
-    window.localStorage.removeItem(LOCK_KEY);
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ user: ADMIN_USERNAME, expires: Date.now() + SESSION_HOURS * 3600e3 }));
+    // the sign-in is only kept if the database says this email is on the admins list
+    await auth.signIn(address, password, {
+      allowed: (token) => db.rpc('is_admin', {}, { asToken: token }),
+    });
+    await Promise.all([loadCatalog(), loadOrders()]); // now including hidden watches and orders
     return { ok: true };
+  } catch (e) {
+    if (e.code === 'not_allowed') {
+      return {
+        ok: false,
+        error: 'This account isn’t a TimeTag admin yet. Add its email to the admins table in Supabase (see the end of supabase/setup.sql).',
+      };
+    }
+    return { ok: false, error: e.message };
   }
-
-  const l = readJSON(window.localStorage, LOCK_KEY) || { attempts: 0 };
-  const attempts = (l.attempts || 0) + 1;
-  if (attempts >= MAX_ATTEMPTS) {
-    window.localStorage.setItem(LOCK_KEY, JSON.stringify({ attempts: 0, until: Date.now() + LOCK_SECONDS * 1000 }));
-    return { ok: false, error: `Too many attempts. Login locked for ${LOCK_SECONDS} seconds.` };
-  }
-  window.localStorage.setItem(LOCK_KEY, JSON.stringify({ attempts }));
-  return { ok: false, error: `Incorrect username or password. ${MAX_ATTEMPTS - attempts} attempts left.` };
 }
 
-export function logout() {
-  window.sessionStorage.removeItem(SESSION_KEY);
-}
+export const logout = () => auth.signOut();

@@ -5,8 +5,8 @@ import Orders from './Orders.jsx';
 import Inventory from './Inventory.jsx';
 import Collections from './Collections.jsx';
 import Settings from './Settings.jsx';
-import { isLoggedIn, logout } from '../lib/auth.js';
-import { LOW_STOCK, useCatalog, useOrders } from '../lib/store.js';
+import { logout, useAdminSession } from '../lib/auth.js';
+import { LOW_STOCK, loadCatalog, loadOrders, useCatalog, useCatalogError, useOrders, useOrdersError } from '../lib/store.js';
 import { href } from '../lib/router.js';
 import './Admin.css';
 
@@ -18,23 +18,37 @@ const TABS = [
   { id: 'settings', label: 'Settings' },
 ];
 
+const CHECK_ORDERS_EVERY = 60 * 1000; // new orders appear without refreshing the page
+
 export default function AdminApp() {
-  const [authed, setAuthed] = useState(isLoggedIn);
+  const session = useAdminSession();
   const [tab, setTab] = useState('overview');
   const [openOrder, setOpenOrder] = useState(null);
   const orders = useOrders();
   const catalog = useCatalog();
+  const catalogError = useCatalogError();
+  const ordersError = useOrdersError();
 
   useEffect(() => {
     document.title = 'Admin — TimeTag';
   }, []);
 
-  if (!authed) return <AdminLogin onSuccess={() => setAuthed(true)} />;
+  // once signed in: load everything (including hidden watches), then keep checking for new orders
+  useEffect(() => {
+    if (!session) return;
+    loadCatalog();
+    loadOrders();
+    const t = setInterval(() => document.visibilityState === 'visible' && loadOrders(), CHECK_ORDERS_EVERY);
+    return () => clearInterval(t);
+  }, [!!session]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!session) return <AdminLogin />;
 
   const pending = orders.filter((o) => o.status === 'pending').length;
   const low = catalog.filter((p) => p.stock <= LOW_STOCK).length;
   const noCollection = catalog.filter((p) => !p.collectionId).length;
   const badges = { orders: pending, inventory: low, collections: noCollection };
+  const problem = ordersError || catalogError;
 
   const goToOrder = (id) => {
     setTab('orders');
@@ -57,16 +71,19 @@ export default function AdminApp() {
           ))}
         </nav>
         <div className="adm-side__foot">
+          <span className="adm-side__who" title={session.user?.email}>{session.user?.email}</span>
           <a href={href('/')} target="_blank" rel="noreferrer">View store ↗</a>
-          <button type="button" onClick={() => { logout(); setAuthed(false); }}>Log out</button>
+          <button type="button" onClick={logout}>Log out</button>
         </div>
       </aside>
 
       <main className="adm-main">
-        <div className="adm-demo" role="note">
-          <strong>Demo mode:</strong> orders and stock are saved in this browser only. Connect a database before launch so
-          orders from every customer appear here.
-        </div>
+        {problem && (
+          <div className="adm-notice adm-notice--error" role="alert">
+            <strong>Couldn’t load the latest data:</strong> {problem}{' '}
+            <button type="button" className="adm-linkbtn" onClick={() => { loadCatalog(); loadOrders(); }}>Try again</button>
+          </div>
+        )}
         {tab === 'overview' && <Overview orders={orders} catalog={catalog} onOpenOrder={goToOrder} onGo={setTab} />}
         {tab === 'orders' && <Orders orders={orders} catalog={catalog} openId={openOrder} setOpenId={setOpenOrder} />}
         {tab === 'inventory' && <Inventory catalog={catalog} />}

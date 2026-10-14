@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import TimeTagEdit from '../components/TimeTagEdit.jsx';
 import NotFound from './NotFound.jsx';
+import LoadingState from '../components/LoadingState.jsx';
 import { Arrow } from '../components/Icons.jsx';
-import { useCollections, useShopProducts } from '../lib/store.js';
+import { useCatalogError, useCatalogStatus, useCollections, useShopProducts } from '../lib/store.js';
 import { href } from '../lib/router.js';
 import './CollectionPage.css';
 
@@ -10,6 +11,8 @@ import './CollectionPage.css';
 export default function CollectionPage({ id, wishlist }) {
   const collections = useCollections();
   const products = useShopProducts();
+  const status = useCatalogStatus();
+  const loadError = useCatalogError();
   const collection = collections.find((c) => c.id === id);
   const watches = useMemo(() => products.filter((p) => p.collectionId === id), [products, id]);
 
@@ -18,6 +21,8 @@ export default function CollectionPage({ id, wishlist }) {
   }, [collection]);
 
   if (!collection) {
+    if (status === 'loading') return <LoadingState text="Loading collection…" />;
+    if (status === 'error') return <LoadingState error={`We couldn’t load this collection. ${loadError}`} />;
     return <NotFound title="Collection not found" text="This collection doesn’t exist or has been removed." />;
   }
 
