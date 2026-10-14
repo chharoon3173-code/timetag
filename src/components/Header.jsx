@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BagIcon, BrandLockup, CloseIcon, HeartIcon, MenuIcon, SearchIcon, UserIcon } from './Icons.jsx';
 import './Header.css';
 
@@ -13,6 +13,13 @@ const NAV = [
 export default function Header({ wishlistCount = 0, bagCount = 0, onBagClick }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuTop, setMenuTop] = useState(null); // where the header ends, so the menu opens right below it
+  const headerRef = useRef(null);
+
+  const toggleMenu = () => {
+    if (!menuOpen) setMenuTop(headerRef.current?.getBoundingClientRect().bottom ?? null);
+    setMenuOpen((o) => !o);
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -30,7 +37,7 @@ export default function Header({ wishlistCount = 0, bagCount = 0, onBagClick }) 
 
   return (
     <>
-      <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
+      <header ref={headerRef} className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
         <div className="container site-header__inner">
           <a href="#top" className="brand" aria-label="TimeTag home">
             <BrandLockup lionHeight={54} wordWidth={140} />
@@ -61,7 +68,7 @@ export default function Header({ wishlistCount = 0, bagCount = 0, onBagClick }) 
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
-              onClick={() => setMenuOpen((o) => !o)}
+              onClick={toggleMenu}
             >
               {menuOpen ? <CloseIcon /> : <MenuIcon />}
             </button>
@@ -70,7 +77,10 @@ export default function Header({ wishlistCount = 0, bagCount = 0, onBagClick }) 
       </header>
 
       {/* Rendered outside <header>: its backdrop-filter would trap a fixed child */}
-      <div id="mobile-menu" className={`mobile-menu${menuOpen ? ' is-open' : ''}`} hidden={!menuOpen}>
+      <div id="mobile-menu" className={`mobile-menu${menuOpen ? ' is-open' : ''}`}
+        hidden={!menuOpen}
+        style={menuTop != null ? { top: `${menuTop}px` } : undefined}
+      >
         <nav aria-label="Mobile">
           {NAV.map((item, i) => (
             <a key={item.label} href={item.href} onClick={() => setMenuOpen(false)} style={{ animationDelay: `${i * 60}ms` }}>

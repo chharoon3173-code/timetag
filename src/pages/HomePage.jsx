@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import Hero from '../components/Hero.jsx';
-import TrustBar from '../components/TrustBar.jsx';
 import Collections from '../components/Collections.jsx';
 import TimeTagEdit from '../components/TimeTagEdit.jsx';
 import FeaturedCollection from '../components/FeaturedCollection.jsx';
@@ -29,7 +28,6 @@ export default function HomePage({ wishlist }) {
   return (
     <>
       <Hero />
-      <TrustBar />
       <Collections />
       <TimeTagEdit wishlist={wishlist} products={products} />
       <FeaturedCollection />

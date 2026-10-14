@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import AnnouncementBar from './components/AnnouncementBar.jsx';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
@@ -40,6 +41,7 @@ export default function App() {
   return (
     <>
       <a href="#main" className="skip-link">Skip to content</a>
+      <AnnouncementBar />
       <Header wishlistCount={wishlist.count} bagCount={count} onBagClick={openCart} />
       <main id="main">{page}</main>
       <Footer />
