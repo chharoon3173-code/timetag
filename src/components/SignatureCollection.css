@@ -140,7 +140,7 @@
   transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
-  animation: sig-in 0.7s var(--ease) both;
+  /* the fly-in / fade-in is played from SignatureCollection.jsx */
 }
 .sig__center > .watch-svg {
   width: 100%;
@@ -153,9 +153,38 @@
   border-radius: 50%;
   box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
 }
-@keyframes sig-in {
-  from { opacity: 0; transform: translate(-50%, -46%) scale(0.92); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+/* the previous watch steps back and fades while the new one flies in */
+.sig__center--out {
+  z-index: 1;
+  pointer-events: none;
+  animation: sig-out 0.4s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+@keyframes sig-out {
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.55); filter: blur(4px); }
+}
+
+/* the chosen watch's spot on the ring is empty while it flies, then it fades back in */
+.sig__thumb > * { transition: opacity 0.5s 0.15s; }
+.sig__thumb.is-launching > * { opacity: 0; transition: none; }
+
+/* gold pulse when a watch lands in the middle */
+.sig__burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: calc(var(--d) * 0.4);
+  height: calc(var(--d) * 0.4);
+  margin: calc(var(--d) * -0.2) 0 0 calc(var(--d) * -0.2);
+  border-radius: 50%;
+  border: 1px solid var(--gold-light);
+  box-shadow: 0 0 24px rgba(201, 169, 110, 0.35), inset 0 0 24px rgba(201, 169, 110, 0.2);
+  pointer-events: none;
+  animation: sig-burst 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes sig-burst {
+  from { opacity: 0.9; transform: scale(0.55); }
+  to { opacity: 0; transform: scale(1.35); }
 }
 
 /* ---------- details ---------- */
@@ -265,5 +294,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sig__center, .sig__text { animation: none; }
+  .sig__text, .sig__center--out, .sig__burst { animation: none; }
+  .sig__center--out, .sig__burst { display: none; }
 }

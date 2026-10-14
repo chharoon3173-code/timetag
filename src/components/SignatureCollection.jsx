@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ProductVisual } from './Watch.jsx';
 import Grain from './Grain.jsx';
 import { Arrow } from './Icons.jsx';
@@ -8,8 +8,10 @@ import { href } from '../lib/router.js';
 import './SignatureCollection.css';
 
 const AUTO_TURN_MS = 5000; // how often the bezel turns by itself
+const FLIGHT_MS = 1000; // how long a watch takes to fly from the ring to the middle
 const mod = (n, m) => ((n % m) + m) % m;
 const pad = (n) => String(n).padStart(2, '0');
+const reduceMotion = () => !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /**
  * "Our Signature Collection" — watches sit around a rotating bezel.
@@ -17,6 +19,9 @@ const pad = (n) => String(n).padStart(2, '0');
  *
  * How it works: `pos` is how many steps the bezel has turned. It is allowed to grow past the
  * number of watches (…, 5, 6, 7…) so the bezel always turns the short way round, never jumps back.
+ *
+ * The "flight": when a watch is chosen, we remember where its small picture is on screen, then
+ * animate the big middle watch from that spot to the centre (a technique called FLIP).
  */
 export default function SignatureCollection({ products }) {
   const n = products.length;
@@ -26,24 +31,47 @@ export default function SignatureCollection({ products }) {
   const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(false);
   const [added, setAdded] = useState(false);
+  const [flight, setFlight] = useState(null); // { id, from } — a watch flying from the ring to the middle
+  const [leaving, setLeaving] = useState(null); // { product, key } — the previous middle watch fading out
+  const [burst, setBurst] = useState(0); // counts landings, to replay the gold pulse
+
   const sectionRef = useRef(null);
   const dialRef = useRef(null);
+  const centerRef = useRef(null);
+  const thumbRefs = useRef([]);
+  const posRef = useRef(0);
+  const prevProduct = useRef(null);
   const drag = useRef(null);
   const justDragged = useRef(false);
 
   const active = n ? mod(Math.round(pos), n) : 0;
   const product = products[active];
 
-  const next = () => setPos((p) => Math.round(p) + 1);
-  const prev = () => setPos((p) => Math.round(p) - 1);
-  const goTo = (i) =>
-    setPos((p) => {
-      const now = Math.round(p);
-      let d = i - mod(now, n);
-      if (d > n / 2) d -= n; // take the shorter way round
-      if (d < -n / 2) d += n;
-      return now + d;
-    });
+  useEffect(() => {
+    posRef.current = pos;
+  }, [pos]);
+
+  /** Turn the bezel to `target` and, if a different watch is chosen, launch it from the ring. */
+  const turnTo = (target) => {
+    const i = mod(target, n);
+    if (i !== mod(Math.round(posRef.current), n) && !reduceMotion()) {
+      const pic = thumbRefs.current[i]?.querySelector('.watch-svg, .product-photo');
+      if (pic) setFlight({ id: products[i].id, from: pic.getBoundingClientRect() });
+    }
+    setPos(target);
+  };
+  const turnRef = useRef(turnTo);
+  turnRef.current = turnTo; // so the auto-turn timer always uses the latest version
+
+  const next = () => turnTo(Math.round(posRef.current) + 1);
+  const prev = () => turnTo(Math.round(posRef.current) - 1);
+  const goTo = (i) => {
+    const now = Math.round(posRef.current);
+    let d = i - mod(now, n);
+    if (d > n / 2) d -= n; // take the shorter way round
+    if (d < -n / 2) d += n;
+    turnTo(now + d);
+  };
 
   // Only turn by itself while the section is on screen.
   useEffect(() => {
@@ -55,13 +83,62 @@ export default function SignatureCollection({ products }) {
   }, []);
 
   useEffect(() => {
-    if (!inView || paused || dragging || n < 2) return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => setPos((p) => Math.round(p) + 1), AUTO_TURN_MS);
+    if (!inView || paused || dragging || n < 2 || reduceMotion()) return;
+    const t = setInterval(() => turnRef.current(Math.round(posRef.current) + 1), AUTO_TURN_MS);
     return () => clearInterval(t);
   }, [inView, paused, dragging, n]);
 
   useEffect(() => setAdded(false), [active]);
+
+  // Each time the middle watch changes: fade the old one out, and fly (or fade) the new one in.
+  useLayoutEffect(() => {
+    const prevP = prevProduct.current;
+    prevProduct.current = product;
+    if (!prevP || !product || prevP.id === product.id || reduceMotion()) return;
+
+    setLeaving({ product: prevP, key: `${prevP.id}-${Date.now()}` });
+    const el = centerRef.current;
+    if (!el?.animate) return;
+
+    if (flight && flight.id === product.id) {
+      // FLIP: start where the small picture was, end in the middle
+      const to = el.getBoundingClientRect();
+      const from = flight.from;
+      const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+      const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+      const s = from.width / to.width;
+      const base = 'translate(-50%, -50%)';
+      const anim = el.animate(
+        [
+          // lift off gently, glide across the dial…
+          { transform: `${base} translate(${dx}px, ${dy}px) scale(${s}) rotate(-14deg)`, opacity: 0.9, easing: 'cubic-bezier(0.55, 0, 0.3, 1)' },
+          // …overshoot slightly…
+          { offset: 0.78, transform: `${base} scale(1.07) rotate(3deg)`, opacity: 1, easing: 'cubic-bezier(0.3, 0, 0.3, 1)' },
+          // …and settle
+          { transform: `${base} scale(1) rotate(0deg)`, opacity: 1 },
+        ],
+        { duration: FLIGHT_MS }
+      );
+      const landedId = product.id;
+      anim.onfinish = () => {
+        setFlight((f) => (f?.id === landedId ? null : f));
+        setBurst((b) => b + 1);
+      };
+      return () => {
+        anim.cancel();
+        setFlight((f) => (f?.id === landedId ? null : f));
+      };
+    }
+
+    // changed by dragging: a simple fade-in
+    el.animate(
+      [
+        { opacity: 0, transform: 'translate(-50%, -46%) scale(0.92)' },
+        { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+      ],
+      { duration: 600, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }
+    );
+  }, [product?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---------- dragging the bezel ---------- */
   const angleAt = (e) => {
@@ -85,6 +162,7 @@ export default function SignatureCollection({ products }) {
     if (!d.moved && Math.abs(d.turned) > 3) {
       d.moved = true;
       setDragging(true);
+      setFlight(null);
       dialRef.current.setPointerCapture?.(e.pointerId);
     }
     if (d.moved) setPos(d.startPos - d.turned / step); // clockwise drag = bezel turns clockwise
@@ -152,7 +230,8 @@ export default function SignatureCollection({ products }) {
                 <li key={p.id} className="sig__slot" style={{ '--a': `${i * step}deg` }}>
                   <button
                     type="button"
-                    className={`sig__thumb${i === active ? ' is-active' : ''}`}
+                    ref={(el) => (thumbRefs.current[i] = el)}
+                    className={`sig__thumb${i === active ? ' is-active' : ''}${flight?.id === p.id ? ' is-launching' : ''}`}
                     aria-label={`Show ${p.name}`}
                     aria-pressed={i === active}
                     onClick={() => !justDragged.current && goTo(i)}
@@ -163,7 +242,26 @@ export default function SignatureCollection({ products }) {
               ))}
             </ul>
 
-            <a href={href(`/product/${product.id}`)} className="sig__center" key={product.id} aria-label={`View ${product.name}`}>
+            {burst > 0 && <span key={burst} className="sig__burst" aria-hidden="true" />}
+
+            {leaving && (
+              <span
+                key={leaving.key}
+                className="sig__center sig__center--out"
+                aria-hidden="true"
+                onAnimationEnd={() => setLeaving(null)}
+              >
+                <ProductVisual product={leaving.product} />
+              </span>
+            )}
+
+            <a
+              ref={centerRef}
+              href={href(`/product/${product.id}`)}
+              className="sig__center"
+              key={product.id}
+              aria-label={`View ${product.name}`}
+            >
               <ProductVisual product={product} />
             </a>
           </div>
