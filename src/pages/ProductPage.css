@@ -1,7 +1,15 @@
+/* Product page — a clean white & black look (the header and footer stay dark, like every page). */
 .pp {
+  --pp-ink: #111111;        /* main text, buttons */
+  --pp-soft: #555555;       /* descriptions */
+  --pp-mute: #8a8a8a;       /* labels, breadcrumbs */
+  --pp-line: #e6e6e6;       /* dividers */
+  --pp-tile: #f5f5f5;       /* photo backgrounds */
   padding: 28px 0 var(--section-pad);
-  background: radial-gradient(ellipse 60% 50% at 30% 30%, #1c1915 0%, var(--ink) 70%);
+  background: #ffffff;
+  color: var(--pp-ink);
 }
+/* (.pp-crumbs is also used on collection pages, so the colours here only apply on the product page) */
 .pp-crumbs {
   display: flex; flex-wrap: wrap; gap: 10px;
   margin-bottom: 32px; font-size: 12px; letter-spacing: 0.12em; color: var(--mute);
@@ -9,6 +17,10 @@
 .pp-crumbs a { color: var(--mute); text-decoration: none; }
 .pp-crumbs a:hover { color: var(--gold); }
 .pp-crumbs [aria-current] { color: var(--ivory); }
+.pp .pp-crumbs,
+.pp .pp-crumbs a { color: var(--pp-mute); }
+.pp .pp-crumbs a:hover,
+.pp .pp-crumbs [aria-current] { color: var(--pp-ink); }
 
 .pp-grid {
   display: grid;
@@ -23,15 +35,15 @@
   aspect-ratio: 1 / 1;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 42%, #2e2921 0%, #151414 62%, #0f0f10 100%);
-  border: 1px solid rgba(201, 169, 110, 0.22);
+  background: radial-gradient(circle at 50% 42%, #ffffff 0%, var(--pp-tile) 60%, #ececec 100%);
 }
 .pp-badge {
   position: absolute; top: 20px; left: 20px; z-index: 1;
-  padding: 7px 12px; border: 1px solid var(--line);
-  font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold);
+  padding: 7px 12px;
+  background: var(--pp-ink);
+  font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #ffffff;
 }
-.pp-stage .pp-draw { width: 46%; filter: drop-shadow(0 50px 40px rgba(0, 0, 0, 0.75)); transition: transform 1s var(--ease); }
+.pp-stage .pp-draw { width: 46%; filter: drop-shadow(0 40px 30px rgba(0, 0, 0, 0.28)); transition: transform 1s var(--ease); }
 .pp-stage:hover .pp-draw--front,
 .pp-stage:hover .pp-draw--angle { transform: rotate(-4deg) scale(1.06); }
 .pp-draw--front { transform: rotate(-10deg); }
@@ -43,65 +55,80 @@
 .pp-thumb {
   aspect-ratio: 1 / 1; padding: 0; overflow: hidden; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at 50% 45%, #29251f 0%, #141414 75%);
-  border: 1px solid rgba(244, 239, 230, 0.1);
+  background: var(--pp-tile);
+  border: 1px solid transparent;
   transition: border-color 0.3s;
 }
-.pp-thumb:hover { border-color: rgba(201, 169, 110, 0.5); }
-.pp-thumb.is-active { border-color: var(--gold); }
-.pp-thumb .pp-draw { width: 42%; }
+.pp-thumb:hover { border-color: #b5b5b5; }
+.pp-thumb.is-active { border-color: var(--pp-ink); }
+.pp-thumb .pp-draw { width: 42%; filter: drop-shadow(0 12px 10px rgba(0, 0, 0, 0.2)); }
 .pp-thumb .pp-draw--detail { width: 150%; }
 
 /* info */
 .pp-info { position: sticky; top: calc(var(--header-h) + 24px); }
+.pp-info .eyebrow { color: var(--pp-mute); }
 .pp-title {
   margin: 18px 0 12px;
   font-weight: 300; font-size: clamp(32px, 3.4vw, 48px);
   line-height: 1.1; letter-spacing: -0.03em;
+  color: var(--pp-ink);
 }
 .pp-rating { margin-bottom: 18px; }
-.pp-price { margin: 0 0 20px; font-size: 26px; font-weight: 300; color: var(--gold-light); }
-.pp-desc { margin: 0 0 24px; color: #cfc8ba; font-size: 16px; line-height: 1.7; max-width: 520px; }
+.pp-rating .stars { color: var(--pp-ink); }
+.pp-price { margin: 0 0 20px; font-size: 26px; font-weight: 400; color: var(--pp-ink); }
+.pp-desc { margin: 0 0 24px; color: var(--pp-soft); font-size: 16px; line-height: 1.7; max-width: 520px; }
 
 .pp-stock { display: flex; align-items: center; gap: 10px; margin: 0 0 22px; font-size: 14px; }
 .pp-stock i { width: 8px; height: 8px; border-radius: 50%; }
-.pp-stock--in i { background: #7fb38a; box-shadow: 0 0 0 4px rgba(127, 179, 138, 0.15); }
-.pp-stock--low { color: var(--gold-light); }
-.pp-stock--low i { background: var(--gold); box-shadow: 0 0 0 4px rgba(201, 169, 110, 0.18); }
-.pp-stock--out { color: var(--mute); }
-.pp-stock--out i { background: #8e887d; }
+.pp-stock--in i { background: #3f9b5a; box-shadow: 0 0 0 4px rgba(63, 155, 90, 0.15); }
+.pp-stock--low i { background: #d08a1e; box-shadow: 0 0 0 4px rgba(208, 138, 30, 0.18); }
+.pp-stock--out { color: var(--pp-mute); }
+.pp-stock--out i { background: #b5b5b5; }
 
 .pp-buy { display: flex; gap: 12px; align-items: stretch; }
+.pp-buy .qty { border-color: #cfcfcf; }
 .pp-buy .qty button { height: 56px; }
+.pp-buy .qty button:hover:not(:disabled) { color: var(--pp-ink); background: var(--pp-tile); }
 .pp-add { flex: 1; }
-.pp-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.pp .pp-add,
+.pp .pp-add:hover { background: var(--pp-ink); border-color: var(--pp-ink); color: #ffffff; }
+.pp .pp-add:hover:not(:disabled) { background: #333333; border-color: #333333; }
+.pp-add:disabled { opacity: 0.4; cursor: not-allowed; }
 .pp-heart { position: relative; width: 56px; }
-.pp-heart .heart-btn { position: static; width: 56px; height: 56px; border-radius: 0; }
+.pp-heart .heart-btn {
+  position: static; width: 56px; height: 56px; border-radius: 0;
+  background: #ffffff; border-color: #cfcfcf; color: var(--pp-ink);
+}
+.pp-heart .heart-btn:hover,
+.pp-heart .heart-btn.is-active { border-color: var(--pp-ink); color: var(--pp-ink); }
 .pp-now { width: 100%; margin-top: 12px; }
-.pp-inbag { margin: 14px 0 0; font-size: 14px; color: var(--mute); }
+.pp .pp-now { border-color: var(--pp-ink); color: var(--pp-ink); }
+.pp .pp-now:hover { background: var(--pp-ink); border-color: var(--pp-ink); color: #ffffff; }
+.pp-inbag { margin: 14px 0 0; font-size: 14px; color: var(--pp-soft); }
+.pp-inbag a { color: var(--pp-ink); }
 
 .pp-perks {
   list-style: none; margin: 32px 0 0; padding: 22px 0;
   display: flex; flex-wrap: wrap; gap: 18px 28px;
-  border-top: 1px solid rgba(201, 169, 110, 0.16); border-bottom: 1px solid rgba(201, 169, 110, 0.16);
-  font-size: 13px; color: #d9d2c4;
+  border-top: 1px solid var(--pp-line); border-bottom: 1px solid var(--pp-line);
+  font-size: 13px; color: #333333;
 }
 .pp-perks li { display: flex; align-items: center; gap: 10px; }
-.pp-perks svg { color: var(--gold); }
+.pp-perks svg { color: var(--pp-ink); }
 
-.pp-acc details { border-bottom: 1px solid rgba(201, 169, 110, 0.16); }
+.pp-acc details { border-bottom: 1px solid var(--pp-line); }
 .pp-acc summary {
   list-style: none; cursor: pointer;
   display: flex; justify-content: space-between; align-items: center;
   padding: 20px 0; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase;
 }
 .pp-acc summary::-webkit-details-marker { display: none; }
-.pp-acc summary::after { content: '+'; font-size: 20px; color: var(--gold); transition: transform 0.3s; }
+.pp-acc summary::after { content: '+'; font-size: 20px; color: var(--pp-ink); transition: transform 0.3s; }
 .pp-acc details[open] summary::after { transform: rotate(45deg); }
-.pp-acc p { margin: 0 0 16px; color: #b9b2a4; font-size: 14px; line-height: 1.7; }
+.pp-acc p { margin: 0 0 16px; color: var(--pp-soft); font-size: 14px; line-height: 1.7; }
 .pp-specs { margin: 0 0 18px; }
 .pp-specs div { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; font-size: 14px; }
-.pp-specs dt { color: var(--mute); }
+.pp-specs dt { color: var(--pp-mute); }
 .pp-specs dd { margin: 0; text-align: right; }
 
 @media (max-width: 920px) {
@@ -118,3 +145,17 @@
 .pp-thumb .pp-photo { width: 100%; height: 100%; object-fit: cover; }
 .pp-stage .pp-photo { transition: transform 1s var(--ease); }
 .pp-stage:hover .pp-photo { transform: scale(1.04); }
+
+/* "Complete the Collection" row under the product (the section right after .pp): white & black too */
+.pp + .section--ivory { background: #ffffff; border-top: 1px solid #e6e6e6; }
+.pp + .section--ivory .eyebrow { color: #8a8a8a; }
+.pp + .section--ivory .text-link { color: #111111; border-color: rgba(17, 17, 17, 0.3); }
+.pp + .section--ivory .text-link:hover { border-color: #111111; }
+.pp + .section--ivory .arrival__visual { background: radial-gradient(circle at 50% 42%, #ffffff 0%, #f5f5f5 60%, #ececec 100%); }
+.pp + .section--ivory .arrival:hover .arrival__visual { box-shadow: inset 0 0 0 1px #111111; }
+.pp + .section--ivory .arrival__watch { filter: drop-shadow(0 24px 20px rgba(0, 0, 0, 0.25)); }
+.pp + .section--ivory .arrival__name a { color: #111111; background-image: linear-gradient(#111111, #111111); }
+.pp + .section--ivory .arrival__coll { color: #8a8a8a; }
+.pp + .section--ivory .heart-btn--light { background: rgba(255, 255, 255, 0.85); }
+.pp + .section--ivory .heart-btn--light:hover,
+.pp + .section--ivory .heart-btn--light.is-active { color: #111111; border-color: #111111; }
