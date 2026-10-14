@@ -203,7 +203,6 @@ begin
   -- shipping and payment
   v_shipping := case shipping_id
     when 'standard' then '{"id": "standard", "label": "Standard delivery", "detail": "3–5 business days", "price": 0}'::jsonb
-    when 'express'  then '{"id": "express", "label": "Express delivery", "detail": "1–2 business days", "price": 500}'::jsonb
   end;
   if v_shipping is null then raise exception 'Please choose a shipping method.'; end if;
   v_payment := case payment_id

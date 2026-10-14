@@ -163,7 +163,7 @@ export default function ProductPage({ id, wishlist }) {
                 </details>
                 <details>
                   <summary>Shipping &amp; Returns</summary>
-                  <p>Free standard delivery (3–5 business days) or express delivery (1–2 business days) for Rs. 500. Cash on Delivery is available nationwide.</p>
+                  <p>Free standard delivery (3–5 business days). Cash on Delivery is available nationwide.</p>
                   <p>Not quite right? Contact us and we’ll arrange an easy return.</p>
                 </details>
                 <details>

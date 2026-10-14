@@ -30,7 +30,6 @@ export const MAX_SIGNATURE = 4; // the home page dial fits 4 watches
 // decides the real shipping price, so keep the two in sync.
 export const SHIPPING_METHODS = [
   { id: 'standard', label: 'Standard delivery', detail: '3–5 business days', price: 0 },
-  { id: 'express', label: 'Express delivery', detail: '1–2 business days', price: 500 },
 ];
 
 export const PAYMENT_METHODS = [
