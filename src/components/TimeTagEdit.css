@@ -1,255 +1,142 @@
-.edit {
-  background: var(--ink);
+/* ---------- All Watches grid ---------- */
+/* sits right under "Shop by Collection", so no extra space on top.
+   (.section.shop so it wins over the shared .section padding in index.css) */
+.section.shop {
+  padding-top: 0;
 }
-.edit__head {
-  margin-bottom: 36px;
-}
-.edit__kicker {
-  margin: 26px 0 0;
-  font-size: 13px;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--mute);
-}
-.edit .display {
-  margin-top: 14px;
-}
-.edit .display em {
-  color: var(--gold-light);
-}
-
-.chips {
+.shop__head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 40px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(20, 18, 16, 0.12);
 }
-.chip {
-  min-height: 44px;
-  padding: 0 22px;
-  border: 1px solid rgba(244, 239, 230, 0.18);
-  background: transparent;
-  color: #d9d2c4;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.35s, border-color 0.35s, color 0.35s;
-}
-.chip:hover {
-  border-color: var(--gold);
-  color: var(--gold-light);
-}
-.chip.is-active {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: var(--ink);
-}
-
-.edit__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
-  gap: 24px;
-}
-.edit__stack {
-  display: grid;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-}
-
-/* ---- product cards ---- */
-.pcard {
-  position: relative;
-  border: 1px solid rgba(201, 169, 110, 0.2);
-  transition: border-color 0.5s, box-shadow 0.5s;
-  animation: card-in 0.8s var(--ease) both;
-}
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: none; }
-}
-.pcard:hover {
-  border-color: rgba(201, 169, 110, 0.7);
-  box-shadow: 0 0 0 1px rgba(201, 169, 110, 0.25), 0 30px 90px -30px rgba(201, 169, 110, 0.35);
-}
-
-.pcard--featured {
-  display: flex;
-  flex-direction: column;
-  min-height: 780px;
-  padding: clamp(24px, 3vw, 44px);
-  border-color: rgba(201, 169, 110, 0.45);
-  background: radial-gradient(ellipse 70% 55% at 50% 36%, #2b2620 0%, #151414 60%, #101011 100%);
-}
-.pcard--compact {
-  display: grid;
-  grid-template-columns: minmax(150px, 40%) minmax(0, 1fr);
-  min-height: 244px;
-  background: linear-gradient(135deg, #17171a 0%, #111113 100%);
-}
-
-.pcard__badge {
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
-.pcard__visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.pcard__visual > * {
-  transition: transform 1s var(--ease);
-}
-.pcard__visual--featured {
-  flex: 1;
-  padding: 20px 0 30px;
-}
-.pcard__visual--featured > * {
-  width: min(300px, 70%);
-  transform: rotate(-10deg);
-  filter: drop-shadow(0 50px 40px rgba(0, 0, 0, 0.75));
-}
-.pcard--featured:hover .pcard__visual > * {
-  transform: rotate(-6deg) scale(1.06);
-}
-.pcard__visual--compact {
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 45%, #29251f 0%, #141414 70%);
-}
-.pcard__visual--compact > * {
-  width: min(118px, 62%);
-  transform: rotate(-12deg);
-  filter: drop-shadow(0 26px 22px rgba(0, 0, 0, 0.7));
-}
-.pcard--compact:hover .pcard__visual > * {
-  transform: rotate(-6deg) scale(1.1);
-}
-
-.pcard__info {
-  transform: translateY(6px);
-  opacity: 0.9;
-  transition: transform 0.6s var(--ease), opacity 0.6s;
-}
-.pcard:hover .pcard__info {
-  transform: none;
-  opacity: 1;
-}
-.pcard__info--compact {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 28px 64px 28px clamp(20px, 2.4vw, 34px);
-}
-
-.pcard__name {
-  margin: 8px 0 6px;
+.shop__title {
+  margin: 0;
   font-family: var(--font-serif);
   font-weight: 400;
-  font-size: 20px;
-  line-height: 1.25;
+  font-size: clamp(22px, 2.2vw, 30px);
   letter-spacing: -0.01em;
 }
-.pcard__name--lg {
-  margin: 0 0 10px;
-  font-size: clamp(26px, 2.3vw, 34px);
-  font-weight: 300;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+.shop__count {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute-dark);
 }
-.pcard__desc {
-  margin: 0 0 18px;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 300;
-  font-size: 16px;
-  line-height: 1.6;
-  color: #cfc8ba;
+.shop__empty {
+  margin: 40px 0;
+  color: var(--mute-dark);
 }
-.pcard__row {
+
+.shop__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px 20px;
+}
+
+/* ---------- one product ---------- */
+.shop-card__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 42%, #fbf8f2 0%, #ece5d8 72%, #e2d9c8 100%);
+}
+.shop-card__visual {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(201, 169, 110, 0.2);
+  justify-content: center;
 }
-.pcard__price {
+.shop-card__visual > .watch-svg {
+  width: 46%;
+  transform: rotate(-10deg);
+  filter: drop-shadow(0 26px 20px rgba(40, 28, 10, 0.3));
+  transition: transform 0.9s var(--ease);
+}
+.shop-card__visual > .product-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s var(--ease);
+}
+.shop-card:hover .shop-card__visual > .watch-svg { transform: rotate(-4deg) scale(1.06); }
+.shop-card:hover .shop-card__visual > .product-photo { transform: scale(1.05); }
+
+.shop-card__tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  padding: 6px 9px;
+  background: var(--text-dark);
+  color: var(--ivory);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.shop-card__tag--muted { background: #8e887d; }
+
+/* smaller heart than the default, tucked in the corner */
+.shop-card__media .heart-btn {
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+}
+
+.shop-card__info {
+  padding-top: 16px;
+}
+.shop-card__coll {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mute-dark);
+}
+.shop-card__name {
+  margin: 0 0 8px;
   font-family: var(--font-serif);
-  font-size: 17px;
   font-weight: 400;
-  color: #e6dfd1;
+  font-size: 16px;
+  line-height: 1.35;
 }
-.pcard__price--lg {
-  font-size: 26px;
-  font-weight: 300;
-  color: var(--ivory);
+.shop-card__name a {
+  color: inherit;
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.45s var(--ease);
 }
-
-/* dark → champagne gold on card hover */
-.pcard__btn {
-  background: var(--ink);
-  border-color: rgba(244, 239, 230, 0.3);
-  color: var(--ivory);
+.shop-card:hover .shop-card__name a,
+.shop-card__name a:focus-visible {
+  background-size: 100% 1px;
 }
-.pcard__info--compact .pcard__btn {
-  align-self: flex-start;
-  margin-top: 18px;
-}
-.pcard:hover .pcard__btn,
-.pcard__btn:hover {
-  background: var(--gold);
-  border-color: var(--gold);
-  color: var(--ink);
-}
-
-/* swipeable row on tablets & phones — all four watches become equal slides */
-@media (max-width: 920px) {
-  .edit__grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    scroll-snap-type: x mandatory;
-  }
-  .edit__stack { display: contents; }
-  .pcard {
-    flex: 0 0 min(78%, 340px);
-    scroll-snap-align: start;
-  }
-  .pcard--featured {
-    min-height: 0;
-    padding: 24px;
-  }
-  .pcard__visual--featured { padding: 10px 0 20px; min-height: 280px; }
-  .pcard__visual--featured > * { width: min(200px, 66%); }
-  .pcard__name--lg { font-size: 24px; }
-  .pcard__desc { font-size: 14px; }
-  .pcard__price--lg { font-size: 20px; }
-  .pcard__row { margin-top: 16px; padding-top: 16px; }
-  .pcard--featured .pcard__btn { min-height: 44px; padding: 0 18px; font-size: 11px; }
-
-  /* the three smaller cards turn into tall cards that match the first one */
-  .pcard--compact {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .pcard__visual--compact { flex: 1; min-height: 300px; }
-  .pcard__visual--compact > * { width: min(170px, 58%); }
-  .pcard__visual--compact > .product-photo { width: 100%; }
-  .pcard__info--compact { padding: 20px 24px 24px; }
+.shop-card__price {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gold-deep);
+  font-variant-numeric: tabular-nums;
 }
 
-.pcard__name a { color: inherit; text-decoration: none; }
-.pcard__name a:hover { color: var(--gold-light); }
-.pcard__soldout {
-  margin-left: 12px; padding: 3px 8px; vertical-align: middle;
-  border: 1px solid rgba(244, 239, 230, 0.3); font-style: normal;
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute);
+/* ---------- smaller screens ---------- */
+@media (max-width: 1024px) {
+  .shop__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .shop__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; }
+  .shop-card__tag { top: 8px; left: 8px; padding: 5px 7px; font-size: 9px; letter-spacing: 0.14em; }
+  .shop-card__media .heart-btn { top: 6px; right: 6px; width: 34px; height: 34px; }
+  .shop-card__info { padding-top: 12px; }
+  .shop-card__coll { font-size: 10px; letter-spacing: 0.14em; }
+  .shop-card__name { font-size: 14px; }
+  .shop-card__price { font-size: 14px; }
 }
