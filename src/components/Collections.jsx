@@ -6,8 +6,13 @@ import './Collections.css';
 export default function Collections() {
   const collections = useCollections(); // managed in Admin → Collections
   return (
-    <section className="section section--ivory" id="collections" aria-label="Shop by collection">
+    <section className="section section--ivory" id="collections" aria-labelledby="collections-title">
       <div className="container">
+        {/* same heading style as "All Watches" below (shop__head / shop__title in TimeTagEdit.css) */}
+        <div className="shop__head">
+          <h2 id="collections-title" className="shop__title">All Collections</h2>
+        </div>
+
         {/* Swipeable row of brand tiles; each opens that collection's page */}
         <Reveal>
           <div className="collections">
