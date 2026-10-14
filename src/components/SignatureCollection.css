@@ -1,0 +1,269 @@
+/* ---------- Our Signature Collection: rotating bezel ---------- */
+.sig {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse 60% 70% at 30% 55%, #241e14 0%, var(--ink) 70%);
+  color: var(--ivory);
+}
+.sig .container {
+  position: relative; /* above the grain */
+}
+.sig__head {
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+
+.sig__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+}
+
+/* ---------- the dial ---------- */
+.sig__dial {
+  --d: min(520px, 86vw);          /* dial size */
+  --thumb: calc(var(--d) * 0.19); /* watches on the ring */
+  --radius: calc(var(--d) / 2 - var(--thumb) / 2 - var(--d) * 0.07);
+  --turn: transform 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  width: var(--d);
+  height: var(--d);
+  justify-self: center;
+  border-radius: 50%;
+  touch-action: pan-y; /* sideways drags turn the bezel, up/down still scrolls the page */
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sig__dial.is-dragging { cursor: grabbing; }
+
+/* soft glow and inner face */
+.sig__dial::before {
+  content: '';
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, rgba(201, 169, 110, 0.16) 0%, rgba(201, 169, 110, 0.03) 55%, transparent 72%);
+  border: 1px solid rgba(201, 169, 110, 0.14);
+}
+
+/* the bezel: minute ticks, longer ticks every 5 minutes, all turning with the watches */
+.sig__bezel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 169, 110, 0.35);
+  background:
+    repeating-conic-gradient(from -0.6deg, rgba(228, 204, 154, 0.9) 0 1.2deg, transparent 1.2deg 30deg),
+    repeating-conic-gradient(from -0.25deg, rgba(201, 169, 110, 0.45) 0 0.5deg, transparent 0.5deg 6deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--d) * 0.045), #000 calc(100% - var(--d) * 0.045));
+  mask: radial-gradient(farthest-side, transparent calc(100% - var(--d) * 0.045), #000 calc(100% - var(--d) * 0.045));
+  transform: rotate(var(--rot));
+  transition: var(--turn);
+}
+
+/* gold marker at 12 o'clock showing which watch is selected */
+.sig__pointer {
+  position: absolute;
+  top: calc(var(--d) * -0.035);
+  left: 50%;
+  z-index: 3;
+  width: 0;
+  height: 0;
+  margin-left: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid var(--gold);
+  filter: drop-shadow(0 2px 6px rgba(201, 169, 110, 0.5));
+}
+
+.sig__ring {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transform: rotate(var(--rot));
+  transition: var(--turn);
+}
+.sig__slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--thumb);
+  height: var(--thumb);
+  margin: calc(var(--thumb) / -2) 0 0 calc(var(--thumb) / -2);
+  transform: rotate(var(--a)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--a) * -1));
+}
+.sig__thumb {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10%;
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #2a2620 0%, #121110 100%);
+  overflow: hidden;
+  cursor: pointer;
+  /* turn back against the ring so each watch stays upright */
+  transform: rotate(calc(var(--rot) * -1)) scale(0.88);
+  transition: var(--turn), border-color 0.4s, box-shadow 0.4s;
+  opacity: 0.75;
+}
+.sig__thumb:hover { opacity: 1; border-color: rgba(201, 169, 110, 0.6); }
+.sig__thumb.is-active {
+  opacity: 1;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(201, 169, 110, 0.14), 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: rotate(calc(var(--rot) * -1)) scale(1.04);
+}
+.sig__thumb:focus-visible { outline: 1px solid var(--gold-light); outline-offset: 4px; }
+.sig__thumb > .watch-svg { width: 62%; pointer-events: none; }
+.sig__thumb > .product-photo { width: 120%; height: 120%; object-fit: cover; pointer-events: none; }
+
+/* while dragging, follow the finger exactly */
+.sig__dial.is-dragging .sig__bezel,
+.sig__dial.is-dragging .sig__ring,
+.sig__dial.is-dragging .sig__thumb {
+  transition: none;
+}
+
+/* the big watch in the middle */
+.sig__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: calc(var(--d) * 0.24); /* small enough that the strap clears the watches on the ring */
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  animation: sig-in 0.7s var(--ease) both;
+}
+.sig__center > .watch-svg {
+  width: 100%;
+  filter: drop-shadow(0 30px 30px rgba(0, 0, 0, 0.7));
+}
+.sig__center > .product-photo {
+  width: calc(var(--d) * 0.36);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
+}
+@keyframes sig-in {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.92); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ---------- details ---------- */
+.sig__info {
+  min-width: 0;
+  max-width: 460px;
+}
+.sig__count {
+  margin: 0 0 22px;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.sig__count span {
+  font-size: 30px;
+  font-weight: 200;
+  letter-spacing: 0.06em;
+  color: var(--gold-light);
+}
+.sig__text {
+  animation: sig-text 0.6s var(--ease) both;
+}
+@keyframes sig-text {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.sig__coll {
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.sig__name {
+  margin: 0 0 14px;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.sig__desc {
+  margin: 0 0 18px;
+  color: #cfc8ba;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.sig__price {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0 0 28px;
+  font-size: 20px;
+  color: var(--gold-light);
+  font-variant-numeric: tabular-nums;
+}
+.sig__price em {
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.sig__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.sig__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sig__arrow {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 169, 110, 0.35);
+  background: none;
+  color: var(--ivory);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color 0.3s, color 0.3s, background-color 0.3s;
+}
+.sig__arrow:hover { border-color: var(--gold); color: var(--gold-light); background: rgba(201, 169, 110, 0.08); }
+.sig__arrow:focus-visible { outline: 1px solid var(--gold-light); outline-offset: 3px; }
+.sig__hint {
+  margin-left: 10px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--mute);
+}
+
+/* ---------- tablets & phones: dial on top, details below ---------- */
+@media (max-width: 900px) {
+  .sig__layout { grid-template-columns: minmax(0, 1fr); }
+  .sig__info { max-width: none; text-align: center; }
+  .sig__price, .sig__actions, .sig__nav { justify-content: center; }
+  .sig__count { margin-top: 8px; }
+}
+@media (max-width: 480px) {
+  .sig__actions .btn { flex: 1 1 140px; padding-left: 14px; padding-right: 14px; white-space: nowrap; letter-spacing: 0.16em; }
+  .sig__hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sig__center, .sig__text { animation: none; }
+}
