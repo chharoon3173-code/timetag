@@ -18,33 +18,37 @@ npm run preview  # preview the production build
 ```
 timetag/
 ├── index.html                 # page shell, fonts, meta tags
-├── public/favicon.svg
+├── public/
+│   ├── favicon.png, apple-touch-icon.png
+│   ├── brand/                 # lion + wordmark logos, hero.jpg, collections/ (brand tile logos)
+│   └── reviews/               # WhatsApp review screenshots (names blurred)
 └── src/
     ├── main.jsx               # React entry point
     ├── App.jsx                # puts all the sections together
     ├── index.css              # colours, fonts, buttons, shared styles
-    ├── data/products.js       # ← products, prices, collections, reviews (edit here)
+    ├── data/products.js       # ← products, prices, brand tiles, review list (edit here)
     ├── hooks/useWishlist.js   # wishlist state, saved in the browser
     ├── lib/store.js           # cart, orders, stock (swap for a database later)
     ├── lib/auth.js            # admin login
     ├── lib/router.js          # page routing (#/product/…, #/checkout, …)
     ├── pages/                 # HomePage, ProductPage, CheckoutPage, ThankYouPage
     ├── admin/                 # admin login, overview, orders, inventory
-    └── components/
+    └── components/                    (home page sections, top to bottom)
+        ├── AnnouncementBar.jsx/.css   sliding gold bar above the header (free shipping…)
         ├── Header.jsx/.css            sticky nav + mobile menu
-        ├── Hero.jsx/.css              "More than just time" hero
-        ├── TrustBar.jsx/.css          shipping / authentic / returns / payments
-        ├── Collections.jsx/.css       Find Your Signature Timepiece
-        ├── TimeTagEdit.jsx/.css       The TimeTag Edit showcase + filters
-        ├── FeaturedCollection.jsx/.css Timeless by Design banner
-        ├── NewArrivals.jsx/.css       Just In
-        ├── BrandStory.jsx/.css        Built Around Time
-        ├── WhyTimeTag.jsx/.css        four benefits
-        ├── Reviews.jsx/.css           Worn. Loved. Remembered.
+        ├── Hero.jsx/.css              "More than just time" hero with the watch photo
+        ├── Collections.jsx/.css       Shop by Collection — brand logo tiles
+        ├── TimeTagEdit.jsx/.css       All Watches product grid (#edit)
+        ├── FeaturedCollection.jsx/.css Timeless by Design banner + live Pakistan time
+        ├── SignatureCollection.jsx/.css Our Signature Collection — rotating bezel dial
+        ├── CustomerReviews.jsx/.css   Hear From Our Happy Customers — sliding WhatsApp reviews
+        ├── WhyChooseUs.jsx/.css       Why Choose Us between animated waves (#story)
         ├── Newsletter.jsx/.css        Stay In Time
         ├── Footer.jsx/.css
+        ├── NewArrivals.jsx/.css       "You may also like" row on product pages
+        ├── CartDrawer.jsx/.css, checkout/   bag and checkout layout
         ├── Watch.jsx                  vector watch drawing (+ ProductVisual)
-        ├── HeartButton.jsx, Icons.jsx, Reveal.jsx, Grain.jsx
+        ├── HeartButton.jsx, QtyStepper.jsx, Icons.jsx, Reveal.jsx, Grain.jsx
 ```
 
 ## Pages
@@ -79,7 +83,9 @@ timetag/
 
 - **Cart drawer**, product pages, checkout with validation, and a thank-you page
 - **Stock tracking** — orders reduce stock, sold-out watches can't be bought
-- **Filter chips** in The TimeTag Edit (All / Men's / Women's / Best Sellers / New Arrivals)
+- **All Watches grid** showing every visible watch, and a **Signature Collection** dial of Best Sellers
+  (drag the bezel, tap a watch, or use the arrows)
+- **Customer review slider** — tap a review to see it full size
 - **Wishlist hearts** with a live count on the header icon (remembered between visits)
 - **Newsletter form** with email validation and a thank-you state
 - **Mobile menu**, sticky header, scroll fade-in animations, hover effects
@@ -97,7 +103,6 @@ The photo replaces the drawing everywhere that product appears.
 ## Before going live
 
 - Product names (other than Chronograph X1) and prices are **placeholders**.
-- The three reviews are **placeholder text** — replace them with real, verified customer reviews.
 - Social links in `Footer.jsx` point to `#` — add your real profile URLs.
 - The newsletter form doesn't send anywhere yet — see the `TODO` in `Newsletter.jsx`.
 - Bank transfer details on the thank-you page are placeholders — edit `BANK_DETAILS` in `src/pages/ThankYouPage.jsx`.

@@ -131,6 +131,7 @@ export const PRODUCTS = [
   },
 ];
 
+// Category filters (not shown on the site yet — kept for the planned "Shop ▾" menu).
 export const FILTERS = [
   { key: 'all', label: 'All', test: () => true },
   { key: 'men', label: "Men's", test: (p) => p.gender.includes('men') },
@@ -139,8 +140,7 @@ export const FILTERS = [
   { key: 'new', label: 'New Arrivals', test: (p) => p.tags.includes('new') },
 ];
 
-export const NEW_ARRIVAL_IDS = ['meridian-automatic', 'aurelia-34', 'verdant-gmt', 'noir-chronograph'];
-
+// Collection names for the admin's "Collection" dropdown.
 export const COLLECTIONS = [
   { id: 'classics', number: '01', title: 'The Classics', description: 'Traditional elegance, refined over generations of style.', tone: 'amber', size: 'large', watch: WATCH_STYLES.heritageGold },
   { id: 'modern', number: '02', title: 'Modern Icons', description: 'Contemporary design with a confident presence.', tone: 'navy', size: 'medium', watch: WATCH_STYLES.midnight },
@@ -159,13 +159,6 @@ export const BRAND_COLLECTIONS = [
   { id: 'bestwin', title: 'Bestwin', mark: 'B', image: 'brand/collections/bestwin.png' },
   { id: 'automatic', title: 'Automatic Watches', mark: 'A', image: 'brand/collections/automatic.png' },
   { id: 'master-grade', title: 'Master Grade', mark: 'MG', image: 'brand/collections/master-grade.png' },
-];
-
-// Placeholder testimonials — replace with real, verified customer reviews before launch.
-export const REVIEWS = [
-  { id: 1, quote: 'The weight on the wrist, the finish on the case — it feels far beyond what I paid. I have stopped reaching for anything else.', name: '[Customer name]', initial: 'C', product: 'Chronograph X1', rating: 5 },
-  { id: 2, quote: 'It arrived in a box that felt like an occasion in itself. A gift for my father — he hasn’t taken it off since.', name: '[Customer name]', initial: 'C', product: 'Heritage Classique', rating: 5 },
-  { id: 3, quote: 'Understated enough for the office, sharp enough for the evening. Exactly the watch I had been looking for.', name: '[Customer name]', initial: 'C', product: 'Meridian Automatic', rating: 5 },
 ];
 
 // Real WhatsApp reviews for the "Hear From Our Happy Customers" slider (images in /public/reviews).
