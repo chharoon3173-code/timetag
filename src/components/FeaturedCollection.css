@@ -1,11 +1,8 @@
-.feature {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  min-height: 680px;
-}
+/* full-width band: close-up of a watch showing live Pakistan time */
 .feature__media {
   position: relative;
   overflow: hidden;
+  min-height: 420px;
   background: radial-gradient(ellipse 60% 60% at 45% 50%, #33402f 0%, #121812 45%, #070908 100%);
 }
 /* macro crop: the watch is drawn larger than its frame */
@@ -25,25 +22,6 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at 40% 50%, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
-}
-.feature__copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(48px, 7vw, 120px);
-}
-.feature__title {
-  margin-top: 26px;
-}
-.feature__quote {
-  max-width: 440px;
-  margin: 28px 0 44px;
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 300;
-  font-size: clamp(18px, 1.6vw, 22px);
-  line-height: 1.55;
-  color: #4a4339;
 }
 
 /* live PKT label */
@@ -83,7 +61,12 @@
   50% { box-shadow: 0 0 0 6px rgba(201, 169, 110, 0); }
 }
 
-@media (max-width: 920px) {
-  .feature { grid-template-columns: minmax(0, 1fr); }
-  .feature__media { min-height: 420px; }
+/* computers: the band is the full screen width now, so keep the watch at the size it had
+   when it filled half the screen instead of letting it grow with the width */
+@media (min-width: 921px) {
+  .feature__media { min-height: 560px; }
+  .feature__watch {
+    left: calc(50% - 560px);
+    width: 1120px;
+  }
 }
