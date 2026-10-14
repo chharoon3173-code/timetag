@@ -4,6 +4,7 @@ import Overview from './Overview.jsx';
 import Orders from './Orders.jsx';
 import Inventory from './Inventory.jsx';
 import Collections from './Collections.jsx';
+import Settings from './Settings.jsx';
 import { isLoggedIn, logout } from '../lib/auth.js';
 import { LOW_STOCK, useCatalog, useOrders } from '../lib/store.js';
 import { href } from '../lib/router.js';
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'orders', label: 'Orders' },
   { id: 'inventory', label: 'Inventory' },
   { id: 'collections', label: 'Collections' },
+  { id: 'settings', label: 'Settings' },
 ];
 
 export default function AdminApp() {
@@ -69,6 +71,7 @@ export default function AdminApp() {
         {tab === 'orders' && <Orders orders={orders} catalog={catalog} openId={openOrder} setOpenId={setOpenOrder} />}
         {tab === 'inventory' && <Inventory catalog={catalog} />}
         {tab === 'collections' && <Collections catalog={catalog} onOpenInventory={() => setTab('inventory')} />}
+        {tab === 'settings' && <Settings />}
       </main>
     </div>
   );

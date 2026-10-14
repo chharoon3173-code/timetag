@@ -31,8 +31,8 @@ timetag/
     ├── lib/store.js           # cart, orders, stock (swap for a database later)
     ├── lib/auth.js            # admin login
     ├── lib/router.js          # page routing (#/product/…, #/checkout, …)
-    ├── pages/                 # HomePage, ProductPage, CheckoutPage, ThankYouPage
-    ├── admin/                 # admin login, overview, orders, inventory
+    ├── pages/                 # HomePage, ProductPage, CollectionPage, CheckoutPage, ThankYouPage
+    ├── admin/                 # admin login, overview, orders, inventory, collections, settings
     └── components/                    (home page sections, top to bottom)
         ├── AnnouncementBar.jsx/.css   sliding gold bar above the header (free shipping…)
         ├── Header.jsx/.css            sticky nav + mobile menu
@@ -57,6 +57,7 @@ timetag/
 | --- | --- |
 | `#/` | Home |
 | `#/product/<id>` | Product page (gallery, stock, add to bag, buy now) |
+| `#/collection/<id>` | One collection's watches (opened from the collection logos and the footer); shows "coming soon" when empty |
 | `#/checkout` | Checkout (contact, delivery, shipping method, COD / bank transfer) |
 | `#/thank-you/<order>` | Order confirmation |
 | `#/admin` | Admin panel — orders, inventory, overview (also linked as "Staff login" in the footer) |
@@ -71,6 +72,8 @@ timetag/
 - **Collections:** pick the 4 watches for the home page **Signature Collection** dial; **+ Add collection**
   (name + optional logo), rename it, change its logo or delete it. Collections show in the home page
   "Shop by Collection" row and the footer. Watches with no collection are flagged here.
+- **Settings:** edit, add, reorder or remove the messages in the sliding **announcement bar** above the
+  header (with a live preview), or switch the bar off.
 - **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, price, stock,
   collection (required), description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
   choose; first photo is the main one; reorder or remove). Photos are resized automatically. **Edit** any

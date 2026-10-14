@@ -131,6 +131,14 @@ export const PRODUCTS = [
   },
 ];
 
+// The sliding gold bar above the header. Change it in Admin → Settings; this is the default text.
+export const DEFAULT_ANNOUNCEMENTS = [
+  'Free shipping on all orders',
+  '100% authentic — guaranteed genuine',
+  'Easy, hassle-free returns',
+  'Secure payments — encrypted checkout',
+];
+
 // Category filters (not shown on the site yet — kept for the planned "Shop ▾" menu).
 export const FILTERS = [
   { key: 'all', label: 'All', test: () => true },

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { BrandLockup, FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from './Icons.jsx';
 import { useCollections } from '../lib/store.js';
+import { href } from '../lib/router.js';
 import './Footer.css';
 
 const SHOP = { title: 'Shop', links: [['All Watches', '#edit'], ["Men's", '#edit'], ["Women's", '#edit'], ['New Arrivals', '#edit'], ['Best Sellers', '#edit']] };
@@ -21,7 +22,7 @@ const SOCIAL = [
 export default function Footer() {
   const collections = useCollections();
   const columns = useMemo(
-    () => [SHOP, { title: 'Collections', links: collections.map((c) => [c.title, '#collections']) }, ...OTHER_COLUMNS],
+    () => [SHOP, { title: 'Collections', links: collections.map((c) => [c.title, href(`/collection/${c.id}`)]) }, ...OTHER_COLUMNS],
     [collections]
   );
   return (

@@ -8,7 +8,7 @@
  *     The rest of the app only talks to this file, so nothing else needs to change.
  */
 import { useMemo, useSyncExternalStore } from 'react';
-import { DEFAULT_COLLECTIONS, PRODUCTS, WATCH_STYLES } from '../data/products.js';
+import { DEFAULT_ANNOUNCEMENTS, DEFAULT_COLLECTIONS, PRODUCTS, WATCH_STYLES } from '../data/products.js';
 
 const KEYS = {
   products: 'timetag:products', // watches added from the admin panel
@@ -17,11 +17,12 @@ const KEYS = {
   cart: 'timetag:cart',
   collections: 'timetag:collections', // the collection list, once it's been edited in the admin
   signature: 'timetag:signature', // watch ids picked for the Signature Collection (4 slots)
+  announcement: 'timetag:announcement', // the sliding bar's text, once it's been edited in the admin
 };
 
 // What each saved item falls back to when nothing is stored yet.
-// `null` for collections/signature means "use the defaults".
-const FALLBACKS = { products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null };
+// `null` for collections/signature/announcement means "use the defaults".
+const FALLBACKS = { products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null, announcement: null };
 
 export const LOW_STOCK = 3;
 export const MAX_PER_ITEM = 5;
@@ -64,11 +65,12 @@ let state = {
   cart: read(KEYS.cart, []), // [{ id, qty }]
   collections: read(KEYS.collections, null), // [{ id, title, image }] or null = DEFAULT_COLLECTIONS
   signature: read(KEYS.signature, null), // ['watch-id', '', …] (empty string = empty slot) or null
+  announcement: read(KEYS.announcement, null), // { show, messages: [...] } or null = DEFAULT_ANNOUNCEMENTS
   cartOpen: false,
 };
 const listeners = new Set();
 
-const PERSISTED = ['products', 'inventory', 'orders', 'cart', 'collections', 'signature'];
+const PERSISTED = ['products', 'inventory', 'orders', 'cart', 'collections', 'signature', 'announcement'];
 
 function setState(patch) {
   state = { ...state, ...patch };
@@ -223,6 +225,27 @@ export function useShopProducts() {
 export function getCatalog() {
   return buildCatalog(state.inventory, state.products, getCollections());
 }
+
+/* ---------------- announcement bar ---------------- */
+export const MAX_ANNOUNCEMENTS = 8;
+export const MAX_ANNOUNCEMENT_LENGTH = 80;
+const DEFAULT_ANNOUNCEMENT = { show: true, messages: DEFAULT_ANNOUNCEMENTS };
+
+/** The sliding bar above the header: { show, messages }. */
+export function useAnnouncement() {
+  return useSlice((s) => s.announcement) || DEFAULT_ANNOUNCEMENT;
+}
+
+/** Saves the bar's text from the admin. Empty lines are dropped. Returns { ok, error? }. */
+export function setAnnouncement({ show, messages }) {
+  // BACKEND: replace with an API call
+  const clean = messages.map((m) => m.trim().slice(0, MAX_ANNOUNCEMENT_LENGTH)).filter(Boolean).slice(0, MAX_ANNOUNCEMENTS);
+  if (show && !clean.length) return { ok: false, error: 'Add at least one message, or switch the bar off.' };
+  return commit({ announcement: { show: !!show, messages: clean } });
+}
+
+/** Goes back to the default text (DEFAULT_ANNOUNCEMENTS in data/products.js). */
+export const resetAnnouncement = () => commit({ announcement: null });
 
 /* ---------------- Signature Collection ---------------- */
 const NO_PICKS = [];
@@ -427,7 +450,7 @@ export function updateOrderStatus(id, status) {
   setState({ orders, inventory });
 }
 
-/** Clears all demo orders, stock changes, collection edits and Signature picks in this browser. */
+/** Clears all demo orders, stock changes, collection edits, Signature picks and bar text in this browser. */
 export function resetDemoData() {
-  setState({ products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null });
+  setState({ products: [], inventory: {}, orders: [], cart: [], collections: null, signature: null, announcement: null });
 }

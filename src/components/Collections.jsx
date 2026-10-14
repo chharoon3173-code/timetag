@@ -1,6 +1,7 @@
 import Reveal from './Reveal.jsx';
 import { Arrow } from './Icons.jsx';
 import { useCollections } from '../lib/store.js';
+import { href } from '../lib/router.js';
 import './Collections.css';
 
 export default function Collections() {
@@ -16,11 +17,11 @@ export default function Collections() {
           <a href="#edit" className="text-link">All Collections <Arrow /></a>
         </Reveal>
 
-        {/* Swipeable row of brand tiles */}
+        {/* Swipeable row of brand tiles; each opens that collection's page */}
         <Reveal>
           <div className="collections">
             {collections.map((c) => (
-              <a key={c.id} href="#edit" className="collection">
+              <a key={c.id} href={href(`/collection/${c.id}`)} className="collection">
                 <span className="collection__mark" aria-hidden="true">
                   {c.image ? <img src={c.image} alt="" loading="lazy" /> : c.mark}
                 </span>

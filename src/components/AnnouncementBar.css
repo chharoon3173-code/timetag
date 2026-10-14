@@ -8,15 +8,18 @@
 .announce__track {
   display: flex;
   width: max-content;
-  animation: announce-slide 36s linear infinite;
+}
+/* starts once one set of messages has been measured (see AnnouncementBar.jsx) */
+.announce__track.is-ready {
+  animation: announce-slide var(--dur) linear infinite;
 }
 .announce:hover .announce__track {
   animation-play-state: paused;
 }
-/* 4 identical groups → moving by one quarter loops seamlessly */
+/* identical sets side by side → moving by exactly one set's width loops seamlessly */
 @keyframes announce-slide {
   from { transform: translateX(0); }
-  to { transform: translateX(-25%); }
+  to { transform: translateX(var(--shift)); }
 }
 
 .announce__group {
@@ -45,13 +48,12 @@
 @media (max-width: 560px) {
   .announce__item { padding-left: 28px; font-size: 10px; letter-spacing: 0.18em; }
   .announce__sep { margin-left: 28px; }
-  .announce__track { animation-duration: 28s; }
 }
 
-/* Keeps sliding (slowly) even with "reduce motion", like the old trust strip did */
+/* Keeps sliding (slower) even with "reduce motion", like the old trust strip did */
 @media (prefers-reduced-motion: reduce) {
-  .announce__track {
-    animation: announce-slide 60s linear infinite !important;
+  .announce__track.is-ready {
+    animation: announce-slide calc(var(--dur) * 1.6) linear infinite !important;
   }
   .announce:hover .announce__track {
     animation-play-state: paused !important;

@@ -1,18 +1,14 @@
+import { useLayoutEffect, useRef, useState } from 'react';
+import { useAnnouncement } from '../lib/store.js';
 import './AnnouncementBar.css';
 
-// Edit the sliding messages here.
-const MESSAGES = [
-  'Free shipping on all orders',
-  '100% authentic — guaranteed genuine',
-  'Easy, hassle-free returns',
-  'Secure payments — encrypted checkout',
-];
+const SPEED = 34; // sliding speed in pixels per second
 
-function Group({ hidden = false }) {
+function Group({ messages, hidden = false, groupRef }) {
   return (
-    <ul className="announce__group" aria-hidden={hidden || undefined}>
-      {MESSAGES.map((m) => (
-        <li key={m} className="announce__item">
+    <ul className="announce__group" aria-hidden={hidden || undefined} ref={groupRef}>
+      {messages.map((m, i) => (
+        <li key={i} className="announce__item">
           {m}
           <span className="announce__sep" aria-hidden="true">◆</span>
         </li>
@@ -21,15 +17,49 @@ function Group({ hidden = false }) {
   );
 }
 
-/** Thin sliding banner above the header. The list is repeated so the loop is seamless. */
-export default function AnnouncementBar() {
+/**
+ * Thin sliding banner above the header. The text is set in Admin → Settings.
+ * One set of messages is measured, then repeated enough times to fill the screen, and the
+ * row slides by exactly one set's width so the loop is seamless however long the text is.
+ * `messages` can be passed in to preview text that hasn't been saved yet (used by the admin).
+ */
+export default function AnnouncementBar({ messages: previewMessages }) {
+  const saved = useAnnouncement();
+  const messages = previewMessages || (saved.show ? saved.messages : []);
+  const groupRef = useRef(null);
+  const [size, setSize] = useState({ width: 0, copies: 2 });
+  const key = messages.join('\n');
+
+  useLayoutEffect(() => {
+    const el = groupRef.current;
+    if (!el) return;
+    const measure = () => {
+      const width = el.offsetWidth;
+      const room = el.parentElement.parentElement.offsetWidth || window.innerWidth;
+      if (width) setSize({ width, copies: Math.max(2, Math.ceil(room / width) + 1) });
+    };
+    measure();
+    // re-measure when the font finishes loading or the window is resized
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    ro?.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [key]);
+
+  if (!messages.length) return null;
+
   return (
     <div className="announce" role="region" aria-label="Store announcements">
-      <div className="announce__track">
-        <Group />
-        <Group hidden />
-        <Group hidden />
-        <Group hidden />
+      <div
+        className={`announce__track${size.width ? ' is-ready' : ''}`}
+        style={{ '--shift': `-${size.width}px`, '--dur': `${Math.max(8, size.width / SPEED)}s` }}
+      >
+        {Array.from({ length: size.copies }, (_, i) => (
+          <Group key={i} messages={messages} hidden={i > 0} groupRef={i === 0 ? groupRef : undefined} />
+        ))}
       </div>
     </div>
   );

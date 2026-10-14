@@ -388,3 +388,32 @@
   .adm-sig__slots { grid-template-columns: minmax(0, 1fr); }
 }
 .adm-sig .adm-card__head { flex-wrap: wrap; gap: 6px 16px; }
+
+/* ---------- Settings: announcement bar ---------- */
+.adm-ann { max-width: 820px; }
+.adm-ann .adm-card__head { flex-wrap: wrap; gap: 10px 16px; }
+.adm-ann__hint { margin: -4px 0 14px; }
+.adm-ann__preview {
+  margin-bottom: 18px; border-radius: 8px; overflow: hidden; border: 1px solid var(--a-line);
+}
+.adm-ann__preview p { margin: 0; padding: 11px 16px; font-size: 13px; color: var(--a-mute); background: #faf8f4; }
+.adm-ann__preview.is-off p { font-style: italic; }
+.adm-ann__list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+.adm-ann__row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.adm-ann__no { font-size: 12px; color: var(--a-mute); text-align: right; font-variant-numeric: tabular-nums; }
+.adm-ann__tools { display: flex; gap: 4px; }
+.adm-ann__tools button {
+  width: 36px; height: 36px; border: 1px solid var(--a-line); border-radius: 6px;
+  background: #fff; color: var(--a-text); font: inherit; font-size: 13px; cursor: pointer;
+}
+.adm-ann__tools button:hover:not(:disabled) { border-color: var(--a-gold); color: var(--a-gold); }
+.adm-ann__tools button:disabled { opacity: 0.35; cursor: default; }
+.adm-ann__foot {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid #f0ece4;
+}
+@media (max-width: 520px) {
+  .adm-ann__row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .adm-ann__no { display: none; }
+  .adm-ann__tools { justify-content: flex-end; }
+}

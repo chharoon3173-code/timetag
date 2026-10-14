@@ -83,7 +83,7 @@ export default function ProductPage({ id, wishlist }) {
         <div className="container">
           <nav className="pp-crumbs" aria-label="Breadcrumb">
             <a href="#top">Home</a><span aria-hidden="true">/</span>
-            {product.collection && <><a href="#collections">{product.collection}</a><span aria-hidden="true">/</span></>}
+            {product.collection && <><a href={href(`/collection/${product.collectionId}`)}>{product.collection}</a><span aria-hidden="true">/</span></>}
             <span aria-current="page">{product.name}</span>
           </nav>
 

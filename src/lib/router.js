@@ -2,6 +2,7 @@
  * Minimal hash router. Works on GitHub Pages with no server config.
  *   #/                     → home
  *   #/product/<id>         → product page
+ *   #/collection/<id>      → one collection's watches
  *   #/checkout             → checkout
  *   #/thank-you/<orderId>  → order confirmation
  *   #/admin                → admin panel

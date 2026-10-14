@@ -5,6 +5,7 @@ import Footer from './components/Footer.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ProductPage from './pages/ProductPage.jsx';
+import CollectionPage from './pages/CollectionPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import ThankYouPage from './pages/ThankYouPage.jsx';
 import NotFound from './pages/NotFound.jsx';
@@ -36,6 +37,7 @@ export default function App() {
   let page;
   if (path === '/') page = <HomePage wishlist={wishlist} />;
   else if ((params = match('/product/:id', path))) page = <ProductPage key={params.id} id={params.id} wishlist={wishlist} />;
+  else if ((params = match('/collection/:id', path))) page = <CollectionPage key={params.id} id={params.id} wishlist={wishlist} />;
   else page = <NotFound />;
 
   return (

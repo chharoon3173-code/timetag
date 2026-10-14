@@ -5,20 +5,33 @@ import { formatPrice } from '../data/products.js';
 import { href } from '../lib/router.js';
 import './TimeTagEdit.css';
 
-/** All watches in the shop as a clean grid — 2 per row on phones, 3 on tablets, 4 on desktop. */
-export default function TimeTagEdit({ wishlist, products }) {
+/**
+ * Watches as a clean grid — 2 per row on phones, 3 on tablets, 4 on desktop.
+ * On the home page it's "All Watches" (#edit). Collection pages reuse it with their own
+ * `title` (and `titleAs="h1"`), hide the collection name on each card, and pass an `empty` message.
+ */
+export default function TimeTagEdit({
+  wishlist,
+  products,
+  id = 'edit',
+  title = 'All Watches',
+  titleAs: Title = 'h2',
+  className = '',
+  showCollection = true,
+  empty = <p className="shop__empty">New watches are on their way. Check back soon.</p>,
+}) {
   return (
-    <section className="section section--ivory shop" id="edit" aria-labelledby="shop-title">
+    <section className={`section section--ivory shop ${className}`} id={id} aria-labelledby={`${id}-title`}>
       <div className="container">
         <div className="shop__head">
-          <h2 id="shop-title" className="shop__title">All Watches</h2>
+          <Title id={`${id}-title`} className="shop__title">{title}</Title>
           <span className="shop__count">
             {products.length} {products.length === 1 ? 'watch' : 'watches'}
           </span>
         </div>
 
         {products.length === 0 ? (
-          <p className="shop__empty">New watches are on their way. Check back soon.</p>
+          empty
         ) : (
           <div className="shop__grid">
             {products.map((p, i) => {
@@ -39,7 +52,7 @@ export default function TimeTagEdit({ wishlist, products }) {
                     <HeartButton product={p} wishlist={wishlist} light size={16} />
                   </div>
                   <div className="shop-card__info">
-                    {p.collection && <p className="shop-card__coll">{p.collection}</p>}
+                    {showCollection && p.collection && <p className="shop-card__coll">{p.collection}</p>}
                     <h3 className="shop-card__name"><a href={link}>{p.name}</a></h3>
                     <p className="shop-card__price">{formatPrice(p.price)}</p>
                   </div>

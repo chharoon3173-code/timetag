@@ -1,0 +1,89 @@
+/* ---------- Collection page (#/collection/<id>) ---------- */
+.cpage {
+  padding: clamp(36px, 5vw, 64px) 0 clamp(32px, 4vw, 48px);
+}
+/* the product page's breadcrumb, recoloured for the light background */
+.cpage__crumbs { margin-bottom: clamp(24px, 3vw, 36px); color: var(--mute-dark); }
+.cpage__crumbs a { color: var(--mute-dark); }
+.cpage__crumbs a:hover { color: var(--gold-deep); }
+.cpage__crumbs [aria-current] { color: var(--text-dark); }
+
+.cpage__head {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 32px);
+}
+/* same circle as the home page "Shop by Collection" tiles */
+.cpage__mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: clamp(96px, 12vw, 140px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(40, 28, 10, 0.08);
+  color: var(--gold-deep);
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(30px, 3.4vw, 42px);
+  letter-spacing: 0.04em;
+}
+.cpage__mark img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
+.cpage__title {
+  margin-top: 14px;
+  text-wrap: balance;
+}
+
+/* the grid that follows */
+.section.cpage__grid {
+  padding-bottom: clamp(64px, 8vw, 110px);
+}
+
+/* ---------- no watches yet ---------- */
+.cpage__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(40px, 7vw, 80px) 16px;
+  border: 1px dashed rgba(122, 95, 51, 0.35);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.45);
+}
+.cpage__empty-icon {
+  color: var(--gold-deep);
+  margin-bottom: 20px;
+}
+.cpage__empty h2 {
+  margin: 0 0 12px;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(24px, 2.6vw, 34px);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.cpage__empty p {
+  margin: 0 0 28px;
+  max-width: 440px;
+  color: var(--mute-dark);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.cpage__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px 28px;
+}
+
+@media (max-width: 480px) {
+  .cpage__head { flex-direction: column; align-items: flex-start; }
+  .cpage__actions .btn { width: 100%; }
+}
