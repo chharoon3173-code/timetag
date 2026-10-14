@@ -152,10 +152,10 @@ export const COLLECTIONS = [
 // `mark` is the monogram shown in the circle. To show a logo image instead, put the file in
 // /public/brand/collections/ and set `image: 'brand/collections/your-file.png'`.
 export const BRAND_COLLECTIONS = [
-  { id: 'rolex', title: 'Rolex', mark: 'R', image: null },
-  { id: 'patek-philippe', title: 'Patek Philippe', mark: 'PP', image: null },
-  { id: 'hublot', title: 'Hublot', mark: 'H', image: null },
-  { id: 'cartier', title: 'Cartier', mark: 'C', image: null },
+  { id: 'rolex', title: 'Rolex', mark: 'R', image: 'brand/collections/rolex.png' },
+  { id: 'patek-philippe', title: 'Patek Philippe', mark: 'PP', image: 'brand/collections/patek-philippe.png' },
+  { id: 'hublot', title: 'Hublot', mark: 'H', image: 'brand/collections/hublot.png' },
+  { id: 'cartier', title: 'Cartier', mark: 'C', image: 'brand/collections/cartier.png' },
   { id: 'bestwin', title: 'Bestwin', mark: 'B', image: null },
   { id: 'automatic', title: 'Automatic Watches', mark: 'A', image: null },
   { id: 'master-grade', title: 'Master Grade', mark: 'MG', image: null },
