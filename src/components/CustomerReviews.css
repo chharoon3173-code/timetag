@@ -1,4 +1,8 @@
 /* ---------- Hear From Our Happy Customers ---------- */
+/* less space at the bottom, so the "Why Choose Us" wave follows the reviews closely */
+.section.cr {
+  padding-bottom: clamp(24px, 4vw, 56px);
+}
 .cr__head {
   margin-bottom: 36px;
 }

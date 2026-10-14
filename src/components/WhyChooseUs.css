@@ -1,0 +1,96 @@
+/* ---------- Why Choose Us (between wave edges) ---------- */
+.wcu {
+  position: relative;
+  background: #fffdf9; /* bright warm white, a step lighter than the ivory reviews above */
+  color: var(--text-dark);
+}
+
+/* waves */
+.wcu__wave {
+  display: block;
+  width: 100%;
+  height: clamp(56px, 8vw, 130px);
+}
+.wcu__layer--light { fill: rgba(20, 18, 16, 0.14); }
+.wcu__layer--mid { fill: rgba(20, 18, 16, 0.3); }
+/* the solid wave matches the section it flows out of */
+.wcu__wave--top .wcu__layer--solid { fill: var(--ivory); }   /* customer reviews above */
+.wcu__wave--bottom .wcu__layer--solid { fill: var(--ink); }  /* newsletter below */
+.wcu__wave--bottom .wcu__layer--light { fill: rgba(11, 11, 12, 0.3); }
+.wcu__wave--bottom .wcu__layer--mid { fill: rgba(11, 11, 12, 0.55); }
+
+/* content */
+.wcu__inner {
+  padding-block: clamp(32px, 5vw, 72px);
+}
+.wcu__head {
+  text-align: center;
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+.wcu__head .eyebrow {
+  justify-content: center;
+  color: var(--gold-deep);
+}
+.wcu__head .display em {
+  color: var(--gold-deep);
+}
+
+.wcu__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wcu__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.wcu__icon {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 22px;
+  border-radius: 50%;
+  background: var(--ivory);
+  color: var(--text-dark);
+  transition: transform 0.5s var(--ease), background-color 0.4s, color 0.4s;
+}
+.wcu__item:hover .wcu__icon {
+  transform: translateY(-4px);
+  background: var(--text-dark);
+  color: var(--gold-light);
+}
+.wcu__item h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(17px, 1.5vw, 20px);
+  letter-spacing: -0.01em;
+}
+.wcu__item p {
+  margin: 0;
+  max-width: 250px;
+  color: var(--mute-dark);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* tablets & phones: 2 × 2 */
+@media (max-width: 900px) {
+  .wcu__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .wcu__grid { gap: 32px 14px; }
+  .wcu__icon { width: 76px; height: 76px; margin-bottom: 16px; }
+  .wcu__icon svg { width: 44px; height: 44px; }
+  .wcu__item p { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wcu__item:hover .wcu__icon { transform: none; }
+}

@@ -5,8 +5,7 @@ import TimeTagEdit from '../components/TimeTagEdit.jsx';
 import FeaturedCollection from '../components/FeaturedCollection.jsx';
 import SignatureCollection from '../components/SignatureCollection.jsx';
 import CustomerReviews from '../components/CustomerReviews.jsx';
-import WhyTimeTag from '../components/WhyTimeTag.jsx';
-import Reviews from '../components/Reviews.jsx';
+import WhyChooseUs from '../components/WhyChooseUs.jsx';
 import Newsletter from '../components/Newsletter.jsx';
 import { useShopProducts } from '../lib/store.js';
 
@@ -28,8 +27,7 @@ export default function HomePage({ wishlist }) {
       <FeaturedCollection />
       <SignatureCollection products={signature} />
       <CustomerReviews />
-      <WhyTimeTag />
-      <Reviews />
+      <WhyChooseUs />
       <Newsletter />
     </>
   );
