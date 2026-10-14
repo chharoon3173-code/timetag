@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckoutShell, OrderSummary } from '../components/checkout/CheckoutShell.jsx';
+import PaymentAccounts, { paymentWhatsAppLink } from '../components/checkout/PaymentAccounts.jsx';
 import { PAYMENT_METHODS, SHIPPING_METHODS, placeOrder, useCart, useCatalogStatus } from '../lib/store.js';
 import { href, navigate } from '../lib/router.js';
-import { formatPrice } from '../data/products.js';
+import { PAYMENT_WHATSAPP, formatPrice } from '../data/products.js';
 
 const SAVED_KEY = 'timetag:checkout-info';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -204,7 +205,18 @@ export default function CheckoutPage() {
                     <input type="radio" name="payment" value={m.id} checked={paymentId === m.id} onChange={() => setPaymentId(m.id)} />
                     <span className="co-option__text">{m.label}</span>
                   </label>
-                  {paymentId === m.id && <p className="co-option__detail">{m.detail}</p>}
+                  {paymentId === m.id && m.id !== 'bank' && <p className="co-option__detail">{m.detail}</p>}
+                  {paymentId === m.id && m.id === 'bank' && (
+                    <div className="co-option__detail">
+                      <p>Send <strong>{formatPrice(total)}</strong> to one of these accounts:</p>
+                      <PaymentAccounts />
+                      <p>
+                        <strong>Important:</strong> after paying, send a screenshot of the payment on WhatsApp to{' '}
+                        <a href={paymentWhatsAppLink()} target="_blank" rel="noreferrer">{PAYMENT_WHATSAPP}</a>.
+                        Your order will be confirmed once we’ve verified your payment.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

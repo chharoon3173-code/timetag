@@ -35,7 +35,7 @@ export const SHIPPING_METHODS = [
 
 export const PAYMENT_METHODS = [
   { id: 'cod', label: 'Cash on Delivery (COD)', detail: 'Pay in cash when your watch arrives.' },
-  { id: 'bank', label: 'Bank transfer', detail: 'Account details are shown after you place the order.' },
+  { id: 'bank', label: 'Bank transfer', detail: 'Pay to Bank Alfalah or JazzCash, then send us the payment screenshot on WhatsApp.' },
 ];
 
 export const ORDER_STATUSES = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];

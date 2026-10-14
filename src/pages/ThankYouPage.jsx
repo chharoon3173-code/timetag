@@ -1,15 +1,9 @@
 import { useEffect } from 'react';
 import { CheckoutShell, OrderSummary } from '../components/checkout/CheckoutShell.jsx';
+import PaymentAccounts, { paymentWhatsAppLink } from '../components/checkout/PaymentAccounts.jsx';
 import { useCatalog, useOrder } from '../lib/store.js';
 import { href } from '../lib/router.js';
-import { formatPrice } from '../data/products.js';
-
-// Shown to customers who choose "Bank transfer". Replace with your real account details.
-const BANK_DETAILS = [
-  ['Bank', '[Your bank name]'],
-  ['Account title', '[Account title]'],
-  ['Account no. / IBAN', '[Your IBAN]'],
-];
+import { PAYMENT_WHATSAPP, formatPrice } from '../data/products.js';
 
 export default function ThankYouPage({ id }) {
   const order = useOrder(id);
@@ -56,7 +50,8 @@ export default function ThankYouPage({ id }) {
           </div>
 
           <div className="ty-card">
-            <h2>Your order is confirmed</h2>
+            {/* bank transfers are only confirmed once the payment has been checked */}
+            <h2>{order.payment.id === 'bank' ? 'We’ve received your order' : 'Your order is confirmed'}</h2>
             <p>
               We’ve received your order and will contact you on <strong>{c.phone}</strong> to confirm delivery.
               {order.payment.id === 'cod' && <> Please keep <strong>{formatPrice(order.total)}</strong> ready in cash when it arrives.</>}
@@ -66,13 +61,23 @@ export default function ThankYouPage({ id }) {
           {order.payment.id === 'bank' && (
             <div className="ty-card ty-card--accent">
               <h2>Complete your payment</h2>
-              <p>Transfer <strong>{formatPrice(order.total)}</strong> to the account below and use <strong>{order.id}</strong> as the reference. We’ll dispatch your watch once payment is received.</p>
-              <dl className="ty-bank">
-                {BANK_DETAILS.map(([k, v]) => (
-                  <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
-                ))}
-                <div><dt>Reference</dt><dd>{order.id}</dd></div>
-              </dl>
+              <p>
+                Send <strong>{formatPrice(order.total)}</strong> to one of the accounts below. If your app lets you
+                add a note, write your order number <strong>{order.id}</strong>.
+              </p>
+              <PaymentAccounts />
+              <p>
+                Then send a screenshot of the payment on WhatsApp to <strong>{PAYMENT_WHATSAPP}</strong>.
+                We’ll confirm your order and dispatch your watch once the payment is verified.
+              </p>
+              <a
+                className="co-btn ty-wa"
+                href={paymentWhatsAppLink(`Hi TimeTag! Here is my payment screenshot for order ${order.id} (${formatPrice(order.total)}).`)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Send screenshot on WhatsApp
+              </a>
             </div>
           )}
 

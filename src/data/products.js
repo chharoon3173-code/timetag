@@ -1,5 +1,5 @@
 // Site content that isn't in the database: watch drawing styles, default bar text, filters,
-// the review screenshots, and the price format.
+// the review screenshots, payment accounts, and the price format.
 //
 // Each watch has a drawing style (`watchStyle`) from WATCH_STYLES, used by <Watch /> until
 // it has photos — pick it in Admin → Inventory → Edit.
@@ -82,5 +82,15 @@ export const CUSTOMER_REVIEWS = [
   { id: 9, image: 'reviews/review-09.jpg', alt: 'WhatsApp review in Urdu with a photo of two watches and accessories. The customer says the parcel arrived, the items are very nice and the quality is very good.' },
   { id: 10, image: 'reviews/review-10.jpg', alt: 'WhatsApp messages in Roman Urdu from a customer who gave the watch to a friend as a gift and says it was an outclass watch.' },
 ];
+
+// Where customers send the money when they choose "Bank transfer" at checkout.
+// Shown at checkout and on the thank-you page — edit here to change both.
+export const PAYMENT_ACCOUNTS = [
+  { name: 'Bank Alfalah', rows: [['Account title', 'Muhammad Haroon Rafiq'], ['Account number', '58385002453845']] },
+  { name: 'JazzCash', rows: [['Account title', 'Muhammad Haroon Rafiq'], ['Mobile number', '03101743278']] },
+];
+
+// Customers send their payment screenshot to this WhatsApp number.
+export const PAYMENT_WHATSAPP = '03060752710';
 
 export const formatPrice = (amount) => `Rs. ${amount.toLocaleString('en-PK')}`;

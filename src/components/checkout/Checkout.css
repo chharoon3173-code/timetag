@@ -96,6 +96,18 @@
 .co-option-wrap.is-selected { background: #faf7f1; }
 .co-option-wrap.is-selected > .co-option { box-shadow: inset 0 0 0 1px var(--co-focus); border-radius: 0; }
 .co-option__detail { margin: 0; padding: 16px 16px 18px 48px; background: #f4f0e8; font-size: 14px; color: var(--co-mute); }
+/* bank transfer: payment accounts (also used on the thank-you page) */
+.co-option__detail p { margin: 0 0 12px; line-height: 1.6; }
+.co-option__detail p:last-child { margin-bottom: 0; }
+.co-option__detail strong,
+.co-option__detail a { color: var(--co-text); font-weight: 500; }
+.co-accounts { display: grid; gap: 10px; margin: 0 0 12px; }
+.ty-card .co-accounts { margin-bottom: 16px; }
+.co-account { padding: 12px 14px; border: 1px solid var(--co-line); border-radius: 6px; background: #fff; }
+.co-account .co-account__name { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--co-text); }
+.co-account .ty-bank { margin: 0; gap: 6px; }
+.co-account .ty-bank dt { white-space: nowrap; }
+.ty-wa { width: 100%; margin: 0 0 18px; }
 
 .co-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -180,5 +192,8 @@
 }
 @media (max-width: 520px) {
   .co-grid { grid-template-columns: minmax(0, 1fr); }
+  .co-option__detail { padding-left: 16px; } /* more room for the account boxes on phones */
+  .co-account .ty-bank div { flex-direction: column; gap: 0; } /* label above value */
+  .co-account .ty-bank dd { text-align: left; }
   .ty-details { grid-template-columns: minmax(0, 1fr); }
 }
