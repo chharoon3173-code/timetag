@@ -123,7 +123,6 @@ Free Supabase projects pause after a week with no visitors — click **Restore**
 ## Before going live
 
 - The 6 demo watches are **placeholders** — delete or hide them in Admin → Inventory once your real watches are in.
-- Social links in `Footer.jsx` point to `#` — add your real profile URLs.
 - The newsletter form doesn't send anywhere yet — see the `TODO` in `Newsletter.jsx`.
 - Bank transfer / JazzCash accounts and the WhatsApp number for payment screenshots are in `PAYMENT_ACCOUNTS` and `PAYMENT_WHATSAPP` in `src/data/products.js` (shown at checkout and on the thank-you page).
 
