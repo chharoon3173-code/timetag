@@ -1,8 +1,8 @@
-/* Swipeable row of brand tiles — about 2½ tiles visible on phones, 5 on desktop */
+/* Swipeable row of brand tiles — about 2⅓ tiles visible on phones, 5 and a bit on desktop (the cut-off tile shows there are more) */
 .collections {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: clamp(150px, 40vw, 210px);
+  grid-auto-columns: clamp(156px, 41vw, 222px);
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 14px;
@@ -16,8 +16,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
-  padding: 26px 14px 28px;
+  gap: 24px;
+  padding: 28px 14px 30px;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid transparent;
   border-radius: 6px;
@@ -39,7 +39,7 @@
   display: grid;
   place-items: center;
   width: 74%;
-  max-width: 140px;
+  max-width: 148px;
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--ivory);
