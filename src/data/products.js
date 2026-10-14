@@ -156,9 +156,9 @@ export const BRAND_COLLECTIONS = [
   { id: 'patek-philippe', title: 'Patek Philippe', mark: 'PP', image: 'brand/collections/patek-philippe.png' },
   { id: 'hublot', title: 'Hublot', mark: 'H', image: 'brand/collections/hublot.png' },
   { id: 'cartier', title: 'Cartier', mark: 'C', image: 'brand/collections/cartier.png' },
-  { id: 'bestwin', title: 'Bestwin', mark: 'B', image: null },
-  { id: 'automatic', title: 'Automatic Watches', mark: 'A', image: null },
-  { id: 'master-grade', title: 'Master Grade', mark: 'MG', image: null },
+  { id: 'bestwin', title: 'Bestwin', mark: 'B', image: 'brand/collections/bestwin.png' },
+  { id: 'automatic', title: 'Automatic Watches', mark: 'A', image: 'brand/collections/automatic.png' },
+  { id: 'master-grade', title: 'Master Grade', mark: 'MG', image: 'brand/collections/master-grade.png' },
 ];
 
 // Placeholder testimonials — replace with real, verified customer reviews before launch.
