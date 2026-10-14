@@ -4,7 +4,7 @@ import Collections from '../components/Collections.jsx';
 import TimeTagEdit from '../components/TimeTagEdit.jsx';
 import FeaturedCollection from '../components/FeaturedCollection.jsx';
 import SignatureCollection from '../components/SignatureCollection.jsx';
-import BrandStory from '../components/BrandStory.jsx';
+import CustomerReviews from '../components/CustomerReviews.jsx';
 import WhyTimeTag from '../components/WhyTimeTag.jsx';
 import Reviews from '../components/Reviews.jsx';
 import Newsletter from '../components/Newsletter.jsx';
@@ -27,7 +27,7 @@ export default function HomePage({ wishlist }) {
       <TimeTagEdit wishlist={wishlist} products={products} />
       <FeaturedCollection />
       <SignatureCollection products={signature} />
-      <BrandStory />
+      <CustomerReviews />
       <WhyTimeTag />
       <Reviews />
       <Newsletter />

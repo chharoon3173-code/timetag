@@ -9,8 +9,9 @@ const BENEFITS = [
 ];
 
 export default function WhyTimeTag() {
+  // id="story": the header's "About" and footer's "Our Story" links land here
   return (
-    <section className="section why" aria-labelledby="why-title">
+    <section className="section why" id="story" aria-labelledby="why-title">
       <div className="container">
         <Reveal className="section-head">
           <div>
