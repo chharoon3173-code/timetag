@@ -1,7 +1,6 @@
-import Watch from './Watch.jsx';
 import Reveal from './Reveal.jsx';
 import { Arrow } from './Icons.jsx';
-import { COLLECTIONS } from '../data/products.js';
+import { BRAND_COLLECTIONS } from '../data/products.js';
 import './Collections.css';
 
 export default function Collections() {
@@ -16,26 +15,19 @@ export default function Collections() {
           <a href="#edit" className="text-link">All Collections <Arrow /></a>
         </Reveal>
 
-        <div className="collections">
-          {COLLECTIONS.map((c, i) => (
-            <Reveal
-              as="a"
-              key={c.id}
-              href="#edit"
-              delay={i * 90}
-              className={`collection collection--${c.size} collection--${c.tone}`}
-            >
-              <div className="collection__watch"><Watch style={c.watch} /></div>
-              <div className="collection__shade" />
-              <div className="collection__text">
-                <span className="collection__no">{c.number}</span>
+        {/* Swipeable row of brand tiles */}
+        <Reveal>
+          <div className="collections">
+            {BRAND_COLLECTIONS.map((c) => (
+              <a key={c.id} href="#edit" className="collection">
+                <span className="collection__mark" aria-hidden="true">
+                  {c.image ? <img src={c.image} alt="" loading="lazy" /> : c.mark}
+                </span>
                 <h3>{c.title}</h3>
-                <p>{c.description}</p>
-                <span className="collection__go">Explore <Arrow /></span>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+              </a>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -148,6 +148,19 @@ export const COLLECTIONS = [
   { id: 'everyday', number: '04', title: 'Everyday Essentials', description: 'Versatile watches for every day and every occasion.', tone: 'bronze', size: 'large', watch: WATCH_STYLES.champagne },
 ];
 
+// Brand tiles in the home page "Shop by Collection" row.
+// `mark` is the monogram shown in the circle. To show a logo image instead, put the file in
+// /public/brand/collections/ and set `image: 'brand/collections/your-file.png'`.
+export const BRAND_COLLECTIONS = [
+  { id: 'rolex', title: 'Rolex', mark: 'R', image: null },
+  { id: 'patek-philippe', title: 'Patek Philippe', mark: 'PP', image: null },
+  { id: 'hublot', title: 'Hublot', mark: 'H', image: null },
+  { id: 'cartier', title: 'Cartier', mark: 'C', image: null },
+  { id: 'bestwin', title: 'Bestwin', mark: 'B', image: null },
+  { id: 'automatic', title: 'Automatic Watches', mark: 'A', image: null },
+  { id: 'master-grade', title: 'Master Grade', mark: 'MG', image: null },
+];
+
 // Placeholder testimonials — replace with real, verified customer reviews before launch.
 export const REVIEWS = [
   { id: 1, quote: 'The weight on the wrist, the finish on the case — it feels far beyond what I paid. I have stopped reaching for anything else.', name: '[Customer name]', initial: 'C', product: 'Chronograph X1', rating: 5 },
