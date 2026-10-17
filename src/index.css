@@ -89,6 +89,16 @@ a {
   white-space: nowrap;
 }
 
+/* the original price of a discounted watch, crossed out after the price customers pay (Price.jsx) */
+.price-was {
+  margin-left: 0.35em;
+  font-size: 0.85em;
+  font-weight: 300;
+  opacity: 0.55;
+  text-decoration-thickness: 1px;
+  white-space: nowrap;
+}
+
 /* ---------- Layout helpers ---------- */
 .container {
   max-width: 1320px;

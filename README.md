@@ -40,7 +40,8 @@ timetag/
         ├── Header.jsx/.css            sticky nav + mobile menu
         ├── Hero.jsx/.css              "More than just time" hero with the watch photo
         ├── Collections.jsx/.css       Shop by Collection — brand logo tiles
-        ├── TimeTagEdit.jsx/.css       All Watches product grid (#edit)
+        ├── TimeTagEdit.jsx/.css       All Watches product grid (#edit), with the All / Best sellers / New arrivals / price dropdown
+        ├── Price.jsx                  a price, with the original crossed out when discounted
         ├── FeaturedCollection.jsx/.css Timeless by Design banner + live Pakistan time
         ├── SignatureCollection.jsx/.css Our Signature Collection — rotating bezel dial
         ├── CustomerReviews.jsx/.css   Hear From Our Happy Customers — sliding WhatsApp reviews
@@ -77,7 +78,8 @@ timetag/
   "All Collections" row and the footer. Watches with no collection are flagged here.
 - **Settings:** edit, add, reorder or remove the messages in the sliding **announcement bar** above the
   header (with a live preview), or switch the bar off.
-- **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, price, stock,
+- **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, original price + optional discounted price (customers pay the discounted one;
+  the original shows crossed out), stock,
   one or more collections (e.g. Rolex + Automatic Watches — it shows on both pages), description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
   choose; first photo is the main one; reorder or remove). Photos are resized and uploaded automatically.
   **Edit** or **Delete** any watch.
@@ -112,7 +114,7 @@ Free Supabase projects pause after a week with no visitors — click **Restore**
 
 - **Cart drawer**, product pages, checkout with validation, and a thank-you page
 - **Stock tracking in the database** — orders reduce stock, sold-out watches can't be bought
-- **All Watches grid** showing every visible watch, and a **Signature Collection** dial of Best Sellers
+- **All Watches grid** showing every visible watch (dropdown: best sellers, new arrivals, price low↔high), and a **Signature Collection** dial of Best Sellers
   (drag the bezel, tap a watch, or use the arrows)
 - **Customer review slider** — tap a review to see it full size
 - **Wishlist hearts** with a live count on the header icon (remembered between visits)

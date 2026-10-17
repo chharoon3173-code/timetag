@@ -19,8 +19,17 @@ function PriceInput({ product, onSaved }) {
       setValue(String(product.price));
       return;
     }
-    if (n !== product.price) save(product, { price: n }, `${product.name}: price set to ${formatPrice(n)}`, onSaved);
+    if (n === product.price) return;
+    // typing a price at or above the original ends the discount (edit the watch to set a new one)
+    const endsDiscount = product.originalPrice > product.price && n >= product.originalPrice;
+    save(
+      product,
+      endsDiscount ? { price: n, originalPrice: null } : { price: n },
+      `${product.name}: price set to ${formatPrice(n)}${endsDiscount ? ' (discount removed)' : ''}`,
+      onSaved
+    );
   };
+  const discounted = product.originalPrice > product.price;
   return (
     <div className="adm-money">
       <span>Rs.</span>
@@ -33,6 +42,7 @@ function PriceInput({ product, onSaved }) {
         onBlur={commit}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
       />
+      {discounted && <small className="adm-was">was <s>{formatPrice(product.originalPrice)}</s></small>}
     </div>
   );
 }

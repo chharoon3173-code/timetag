@@ -2,7 +2,7 @@ import { ProductVisual } from './Watch.jsx';
 import HeartButton from './HeartButton.jsx';
 import Reveal from './Reveal.jsx';
 import { Arrow } from './Icons.jsx';
-import { formatPrice } from '../data/products.js';
+import Price from './Price.jsx';
 import { href } from '../lib/router.js';
 import './NewArrivals.css';
 
@@ -39,7 +39,7 @@ export default function NewArrivals({
                   <h3 className="arrival__name"><a href={href(`/product/${p.id}`)}>{p.name}</a></h3>
                   {p.collection && <p className="arrival__coll">{p.collection}</p>}
                 </div>
-                <span className="arrival__price">{formatPrice(p.price)}</span>
+                <span className="arrival__price"><Price product={p} /></span>
               </div>
             </Reveal>
           ))}

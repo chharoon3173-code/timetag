@@ -58,7 +58,9 @@ create table if not exists public.products (
   name          text not null check (length(trim(name)) between 1 and 120),
   collection_ids text[] not null default '{}',                    -- e.g. {rolex,automatic}: shown on each of these
                                                                  -- collection pages; the first is the name on the card
-  price         integer not null check (price > 0),              -- in rupees
+  price         integer not null check (price > 0),              -- in rupees: what the customer pays
+  original_price integer check (original_price is null or original_price > 0), -- before discount, shown
+                                                                 -- crossed out (empty = no discount)
   stock         integer not null default 0 check (stock >= 0),
   badge         text,                                            -- e.g. 'Best Seller'
   description   text not null default '',
@@ -72,7 +74,10 @@ create table if not exists public.products (
   created_at    timestamptz not null default now()
 );
 
--- Databases set up before 17 Oct 2026 had one collection per watch (collection_id): move it into the list.
+-- Databases set up before 17 Oct 2026: add the discount column, and move the single collection
+-- (collection_id) into the list.
+alter table public.products add column if not exists original_price integer
+  check (original_price is null or original_price > 0);
 alter table public.products add column if not exists collection_ids text[] not null default '{}';
 do $$
 begin

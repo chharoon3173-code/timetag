@@ -108,7 +108,8 @@ const fromProductRow = (r) => ({
   name: r.name,
   // the collections it's in, e.g. ['rolex', 'automatic'] (older databases had a single collection_id)
   collectionIds: r.collection_ids || (r.collection_id ? [r.collection_id] : []),
-  price: r.price,
+  price: r.price, // what the customer pays
+  originalPrice: r.original_price ?? null, // before discount, shown crossed out (null = no discount)
   stock: r.stock,
   badge: r.badge || '',
   description: r.description || '',
@@ -126,6 +127,7 @@ const PRODUCT_COLUMNS = {
   name: 'name',
   collectionIds: 'collection_ids',
   price: 'price',
+  originalPrice: 'original_price',
   stock: 'stock',
   badge: 'badge',
   description: 'description',

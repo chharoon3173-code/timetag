@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Watch from '../components/Watch.jsx';
-import { WATCH_STYLES } from '../data/products.js';
+import { WATCH_STYLES, formatPrice } from '../data/products.js';
 import { addProduct, deleteProduct, updateProduct, useCollections } from '../lib/store.js';
 import { MAX_PHOTOS, compressImage, dataUrlKB } from '../lib/images.js';
 
@@ -16,7 +16,8 @@ const STYLE_OPTIONS = [
 const BLANK = {
   name: '',
   collectionIds: [], // ticked in the form (at least one)
-  price: '',
+  original: '', // original price (required)
+  sale: '', // discounted price — what customers pay (optional)
   stock: '',
   badge: '',
   description: '',
@@ -32,7 +33,9 @@ function fromProduct(p) {
   return {
     name: p.name,
     collectionIds: p.collectionIds || [],
-    price: String(p.price),
+    // a discounted watch has originalPrice above price
+    original: String(p.originalPrice > p.price ? p.originalPrice : p.price),
+    sale: p.originalPrice > p.price ? String(p.price) : '',
     stock: String(p.stock),
     badge: p.badge || '',
     description: p.description || '',
@@ -111,8 +114,11 @@ export default function ProductEditor({ product, onClose, onSaved }) {
     const e = {};
     if (!f.name.trim()) e.name = 'Enter a name';
     if (!collections.some((c) => f.collectionIds.includes(c.id))) e.collectionIds = 'Tick at least one collection';
-    const price = Number(f.price);
-    if (!f.price || !Number.isFinite(price) || price <= 0) e.price = 'Enter a price above 0';
+    const original = Number(f.original);
+    if (!f.original || !Number.isFinite(original) || original <= 0) e.original = 'Enter a price above 0';
+    const sale = Number(f.sale);
+    if (f.sale && (!Number.isFinite(sale) || sale <= 0)) e.sale = 'Enter a price above 0, or leave empty';
+    else if (f.sale && original > 0 && sale >= original) e.sale = 'Must be lower than the original price';
     const stock = Number(f.stock);
     if (f.stock === '' || !Number.isInteger(stock) || stock < 0) e.stock = 'Enter stock (0 or more)';
     if (!f.description.trim()) e.description = 'Add a short description';
@@ -132,7 +138,9 @@ export default function ProductEditor({ product, onClose, onSaved }) {
       name: f.name.trim(),
       // in your collection order, so the first one (shown on the card) is predictable
       collectionIds: collections.filter((c) => f.collectionIds.includes(c.id)).map((c) => c.id),
-      price: Math.round(Number(f.price)),
+      // customers pay the discounted price if there is one; the original is then shown crossed out
+      price: Math.round(Number(f.sale || f.original)),
+      originalPrice: f.sale ? Math.round(Number(f.original)) : null,
       stock: Number(f.stock),
       badge: f.badge.trim(),
       description: f.description.trim(),
@@ -244,16 +252,24 @@ export default function ProductEditor({ product, onClose, onSaved }) {
           </label>
           <div className="adm-form__row">
             <label className="adm-field">
-              <span>Price (Rs.) *</span>
-              <input className={`adm-input${errors.price ? ' is-error' : ''}`} inputMode="numeric" value={f.price} onChange={(e) => set('price', e.target.value.replace(/[^\d]/g, ''))} placeholder="49999" />
-              {errors.price && <em>{errors.price}</em>}
+              <span>Original price (Rs.) *</span>
+              <input className={`adm-input${errors.original ? ' is-error' : ''}`} inputMode="numeric" value={f.original} onChange={(e) => set('original', e.target.value.replace(/[^\d]/g, ''))} placeholder="4500" />
+              {errors.original && <em>{errors.original}</em>}
             </label>
             <label className="adm-field">
-              <span>Stock *</span>
-              <input className={`adm-input${errors.stock ? ' is-error' : ''}`} inputMode="numeric" value={f.stock} onChange={(e) => set('stock', e.target.value.replace(/[^\d]/g, ''))} placeholder="10" />
-              {errors.stock && <em>{errors.stock}</em>}
+              <span>Discounted price (Rs.) — optional</span>
+              <input className={`adm-input${errors.sale ? ' is-error' : ''}`} inputMode="numeric" value={f.sale} onChange={(e) => set('sale', e.target.value.replace(/[^\d]/g, ''))} placeholder="Leave empty if no discount" />
+              {errors.sale && <em>{errors.sale}</em>}
             </label>
           </div>
+          {Number(f.original) > 0 && (
+            <p className="adm-note adm-price-preview">
+              Customers see: <strong>{formatPrice(Number(f.sale) > 0 && Number(f.sale) < Number(f.original) ? Number(f.sale) : Number(f.original))}</strong>
+              {Number(f.sale) > 0 && Number(f.sale) < Number(f.original) && (
+                <> <s>{formatPrice(Number(f.original))}</s> · {Math.round((1 - Number(f.sale) / Number(f.original)) * 100)}% off</>
+              )}
+            </p>
+          )}
           <fieldset className="adm-checks">
             <legend>Collections * (tick every one it belongs to, e.g. Rolex and Automatic Watches)</legend>
             {collections.map((c) => (
@@ -263,10 +279,17 @@ export default function ProductEditor({ product, onClose, onSaved }) {
             ))}
             {errors.collectionIds && <em>{errors.collectionIds}</em>}
           </fieldset>
-          <label className="adm-field">
-            <span>Label on card (optional)</span>
-            <input className="adm-input" value={f.badge} onChange={(e) => set('badge', e.target.value)} placeholder="e.g. Limited Edition" />
-          </label>
+          <div className="adm-form__row">
+            <label className="adm-field">
+              <span>Stock *</span>
+              <input className={`adm-input${errors.stock ? ' is-error' : ''}`} inputMode="numeric" value={f.stock} onChange={(e) => set('stock', e.target.value.replace(/[^\d]/g, ''))} placeholder="10" />
+              {errors.stock && <em>{errors.stock}</em>}
+            </label>
+            <label className="adm-field">
+              <span>Label on card (optional)</span>
+              <input className="adm-input" value={f.badge} onChange={(e) => set('badge', e.target.value)} placeholder="e.g. Limited Edition" />
+            </label>
+          </div>
           <label className="adm-field">
             <span>Short description *</span>
             <textarea className={`adm-input adm-textarea${errors.description ? ' is-error' : ''}`} rows={3} maxLength={220} value={f.description} onChange={(e) => set('description', e.target.value)} placeholder="One or two elegant sentences about the watch." />

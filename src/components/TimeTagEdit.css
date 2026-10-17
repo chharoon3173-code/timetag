@@ -31,6 +31,49 @@
   color: var(--mute-dark);
 }
 
+/* count + the "All watches / Best sellers / Price…" dropdown */
+.shop__head { flex-wrap: wrap; }
+.shop__tools {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.shop__sort select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 40px;
+  padding: 0 38px 0 14px;
+  border: 1px solid rgba(20, 18, 16, 0.25);
+  border-radius: 0;
+  /* the little arrow on the right */
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-dark) 50%) right 18px top 17px / 5px 5px no-repeat,
+    linear-gradient(135deg, var(--text-dark) 50%, transparent 50%) right 13px top 17px / 5px 5px no-repeat,
+    transparent;
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+.shop__sort select:hover,
+.shop__sort select:focus-visible {
+  border-color: var(--text-dark);
+  outline: none;
+}
+.shop__reset {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-dark);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 .shop__grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

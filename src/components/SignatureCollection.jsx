@@ -3,7 +3,7 @@ import { ProductVisual } from './Watch.jsx';
 import Grain from './Grain.jsx';
 import { Arrow } from './Icons.jsx';
 import { addToCart, openCart } from '../lib/store.js';
-import { formatPrice } from '../data/products.js';
+import Price from './Price.jsx';
 import { href } from '../lib/router.js';
 import './SignatureCollection.css';
 
@@ -276,7 +276,7 @@ export default function SignatureCollection({ products }) {
               <h3 className="sig__name">{product.name}</h3>
               <p className="sig__desc">{product.description}</p>
               <p className="sig__price">
-                {formatPrice(product.price)}
+                <span><Price product={product} /></span>
                 {soldOut && <em>Sold out</em>}
               </p>
             </div>

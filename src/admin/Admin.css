@@ -194,6 +194,13 @@
 .adm-money { display: flex; align-items: center; gap: 6px; width: 130px; }
 .adm-money span { font-size: 13px; color: var(--a-mute); }
 .adm-money .adm-input { height: 38px; }
+/* discounted watch: the original price under the quick price box */
+.adm-money { flex-wrap: wrap; row-gap: 2px; }
+.adm-money .adm-input { flex: 1 1 0; min-width: 0; } /* keep "Rs." and the box on one line */
+.adm-was { flex-basis: 100%; padding-left: 26px; font-size: 11px; color: var(--a-mute); }
+/* "Customers see: Rs. 2,499 R̶s̶.̶ ̶4̶,̶5̶0̶0̶ · 44% off" under the price boxes in the editor */
+.adm-price-preview { margin-top: -4px !important; }
+.adm-price-preview s { opacity: 0.6; }
 .adm-stock { display: inline-flex; align-items: center; border: 1px solid var(--a-line); border-radius: 6px; overflow: hidden; }
 .adm-stock button { width: 36px; height: 38px; border: 0; background: #faf8f4; font-size: 16px; cursor: pointer; }
 .adm-stock button:hover:not(:disabled) { background: #f1ece2; }

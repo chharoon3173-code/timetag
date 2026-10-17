@@ -8,7 +8,7 @@ import LoadingState from '../components/LoadingState.jsx';
 import { Arrow, Stars, TruckIcon, ShieldIcon, ReturnIcon } from '../components/Icons.jsx';
 import { addToCart, openCart, useCart, useCatalogError, useCatalogStatus, useShopProducts, LOW_STOCK, MAX_PER_ITEM } from '../lib/store.js';
 import { href, navigate } from '../lib/router.js';
-import { formatPrice } from '../data/products.js';
+import Price from '../components/Price.jsx';
 import './ProductPage.css';
 
 const VIEWS = [
@@ -123,7 +123,7 @@ export default function ProductPage({ id, wishlist }) {
               {product.collection && <p className="eyebrow">{product.collection}</p>}
               <h1 className="pp-title">{product.name}</h1>
               <div className="pp-rating"><Stars rating={product.rating} /></div>
-              <p className="pp-price">{formatPrice(product.price)}</p>
+              <p className="pp-price"><Price product={product} /></p>
               <p className="pp-desc">{product.description}</p>
 
               <p className={`pp-stock pp-stock--${stockLine.cls}`}><i aria-hidden="true" />{stockLine.text}</p>
