@@ -93,4 +93,7 @@ export const PAYMENT_ACCOUNTS = [
 // Customers send their payment screenshot to this WhatsApp number.
 export const PAYMENT_WHATSAPP = '03060752710';
 
+// The floating green WhatsApp button on the shop pages opens a chat with this number.
+export const CHAT_WHATSAPP = '03060752710';
+
 export const formatPrice = (amount) => `Rs. ${amount.toLocaleString('en-PK')}`;

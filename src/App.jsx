@@ -3,6 +3,7 @@ import AnnouncementBar from './components/AnnouncementBar.jsx';
 import Header from './components/Header.jsx';
 import Footer from './components/Footer.jsx';
 import CartDrawer from './components/CartDrawer.jsx';
+import WhatsAppButton from './components/WhatsAppButton.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ProductPage from './pages/ProductPage.jsx';
 import CollectionPage from './pages/CollectionPage.jsx';
@@ -48,6 +49,7 @@ export default function App() {
       <main id="main">{page}</main>
       <Footer />
       <CartDrawer />
+      <WhatsAppButton />
     </>
   );
 }

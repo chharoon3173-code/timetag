@@ -1,0 +1,72 @@
+/* Floating WhatsApp button — bottom-right, under the menu, bag and photo viewer (z-index 49+) */
+.wa-float {
+  position: fixed;
+  right: 22px;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.wa-float__btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #25d366; /* WhatsApp green */
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85), 0 8px 22px rgba(0, 0, 0, 0.28);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s;
+}
+/* a soft ring that pulses now and then, so it's noticed without being annoying */
+.wa-float__btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #25d366;
+  opacity: 0;
+  animation: wa-pulse 4s ease-out 2s infinite;
+}
+@keyframes wa-pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  35%, 100% { transform: scale(1.6); opacity: 0; }
+}
+.wa-float:hover .wa-float__btn,
+.wa-float:focus-visible .wa-float__btn {
+  transform: scale(1.07);
+  box-shadow: 0 0 0 3px #fff, 0 10px 26px rgba(0, 0, 0, 0.32);
+}
+.wa-float:focus-visible { outline: none; }
+
+/* "Chat with us" slides out on hover (computers only — phones just see the round button) */
+.wa-float__label {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: #141210;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateX(8px);
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s var(--ease);
+}
+@media (hover: hover) {
+  .wa-float:hover .wa-float__label,
+  .wa-float:focus-visible .wa-float__label {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .wa-float { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
+  .wa-float__btn { width: 54px; height: 54px; }
+  .wa-float__label { display: none; }
+}
