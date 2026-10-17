@@ -6,7 +6,7 @@ import { usePktStart } from '../lib/clock.js';
  * `style` is one of WATCH_STYLES from data/products.js.
  */
 /** CSS variables for a hand that turns once every `period` seconds, starting at the current PKT time. */
-function handVars(start, period) {
+export function handVars(start, period) {
   const elapsed = start % period;
   return {
     '--dur': `${period}s`,
