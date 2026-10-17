@@ -1,35 +1,31 @@
-/* full-width band: close-up of a watch */
+/* full-width band: close-up photo of a watch dial */
 .feature__media {
   position: relative;
   overflow: hidden;
-  min-height: 420px;
-  background: radial-gradient(ellipse 60% 60% at 45% 50%, #33402f 0%, #121812 45%, #070908 100%);
+  height: 420px;
+  background: #0b0b0c;
 }
-/* macro crop: the watch is drawn larger than its frame */
-.feature__watch {
+/* the photo fills the band; the dial's centre stays in the middle */
+.feature__photo {
   position: absolute;
-  left: -10%;
-  top: 50%;
-  width: 150%;
-  transform: translateY(-50%) rotate(-18deg);
-  filter: drop-shadow(0 60px 60px rgba(0, 0, 0, 0.8));
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 46%;
   transition: transform 2s var(--ease);
 }
-.feature__media:hover .feature__watch {
-  transform: translateY(-50%) rotate(-14deg) scale(1.04);
+.feature__media:hover .feature__photo {
+  transform: scale(1.04);
 }
+/* darkens the edges a little so the band sits nicely between the sections */
 .feature__vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 40% 50%, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+  background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
 }
 
-/* computers: the band is the full screen width now, so keep the watch at the size it had
-   when it filled half the screen instead of letting it grow with the width */
 @media (min-width: 921px) {
-  .feature__media { min-height: 560px; }
-  .feature__watch {
-    left: calc(50% - 560px);
-    width: 1120px;
-  }
+  .feature__media { height: 560px; }
 }
