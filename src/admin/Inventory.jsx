@@ -91,7 +91,7 @@ export default function Inventory({ catalog }) {
                         <span className="adm-thumb"><ProductVisual product={p} /></span>
                         <span>
                           <a href={href(`/product/${p.id}`)} target="_blank" rel="noreferrer">{p.name}</a>
-                          <small>{p.collection || <span className="adm-nocol">No collection</span>}{p.images.length > 0 && ` · ${p.images.length} photo${p.images.length > 1 ? 's' : ''}`}</small>
+                          <small>{p.collectionNames.join(', ') || <span className="adm-nocol">No collection</span>}{p.images.length > 0 && ` · ${p.images.length} photo${p.images.length > 1 ? 's' : ''}`}</small>
                         </span>
                       </div>
                     </td>

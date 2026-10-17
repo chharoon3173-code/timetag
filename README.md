@@ -74,11 +74,11 @@ timetag/
   WhatsApp the customer, export to CSV.
 - **Collections:** pick the 4 watches for the home page **Signature Collection** dial; **+ Add collection**
   (name + optional logo), rename it, change its logo or delete it. Collections show in the home page
-  "Shop by Collection" row and the footer. Watches with no collection are flagged here.
+  "All Collections" row and the footer. Watches with no collection are flagged here.
 - **Settings:** edit, add, reorder or remove the messages in the sliding **announcement bar** above the
   header (with a live preview), or switch the bar off.
 - **Inventory:** change price and stock, hide or show a watch, and **+ Add watch** — name, price, stock,
-  collection (required), description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
+  one or more collections (e.g. Rolex + Automatic Watches — it shows on both pages), description, Men/Women, New Arrivals/Best Sellers, and **up to 6 photos** (drag & drop or
   choose; first photo is the main one; reorder or remove). Photos are resized and uploaded automatically.
   **Edit** or **Delete** any watch.
 - New orders appear by themselves (checked every minute), or click **Refresh** on the Orders page.

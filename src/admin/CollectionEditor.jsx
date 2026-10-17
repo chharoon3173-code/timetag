@@ -57,7 +57,7 @@ export default function CollectionEditor({ collection, watchCount = 0, onClose, 
   async function remove() {
     if (saving) return;
     const note = watchCount
-      ? ` Its ${watchCount} watch${watchCount > 1 ? 'es' : ''} will be kept but will have no collection until you choose a new one.`
+      ? ` Its ${watchCount} watch${watchCount > 1 ? 'es' : ''} will be kept and just taken out of this collection. Any that aren’t in another collection will need a new one.`
       : '';
     if (!window.confirm(`Delete the “${collection.title}” collection?${note}`)) return;
     setSaving('delete');

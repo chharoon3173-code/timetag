@@ -63,7 +63,7 @@ let state = {
   // 'loading' (nothing to show yet) | 'ready' | 'error' (couldn't load and nothing cached)
   status: cache ? 'ready' : 'loading',
   error: '',
-  products: cache?.products || [], // [{ id, name, collectionId, price, stock, … }]
+  products: cache?.products || [], // [{ id, name, collectionIds, price, stock, … }]
   collections: cache?.collections || [], // [{ id, title, image, sort }]
   settings: cache?.settings || { announcement: null, signature: null },
   orders: [], // all orders — only loaded for a signed-in admin
@@ -106,7 +106,8 @@ const slug = (s, fallback) =>
 const fromProductRow = (r) => ({
   id: r.id,
   name: r.name,
-  collectionId: r.collection_id || null,
+  // the collections it's in, e.g. ['rolex', 'automatic'] (older databases had a single collection_id)
+  collectionIds: r.collection_ids || (r.collection_id ? [r.collection_id] : []),
   price: r.price,
   stock: r.stock,
   badge: r.badge || '',
@@ -123,7 +124,7 @@ const fromProductRow = (r) => ({
 
 const PRODUCT_COLUMNS = {
   name: 'name',
-  collectionId: 'collection_id',
+  collectionIds: 'collection_ids',
   price: 'price',
   stock: 'stock',
   badge: 'badge',
@@ -139,7 +140,7 @@ const PRODUCT_COLUMNS = {
 function toProductRow(patch) {
   const row = {};
   for (const [key, column] of Object.entries(PRODUCT_COLUMNS)) {
-    if (key in patch) row[column] = patch[key] === '' && (key === 'badge' || key === 'strap' || key === 'collectionId') ? null : patch[key];
+    if (key in patch) row[column] = patch[key] === '' && (key === 'badge' || key === 'strap') ? null : patch[key];
   }
   return row;
 }
@@ -282,14 +283,14 @@ export async function updateCollection(id, { title, image }) {
   }
 }
 
-/** Deletes a collection. Its watches are kept and become "No collection". */
+/** Deletes a collection. Its watches are kept; it's just taken off their list (the database does the same). */
 export async function deleteCollection(id) {
   const before = state.collections.find((c) => c.id === id);
   try {
     await db.remove('collections', { id });
     setState({
       collections: state.collections.filter((c) => c.id !== id),
-      products: state.products.map((p) => (p.collectionId === id ? { ...p, collectionId: null } : p)),
+      products: state.products.map((p) => ({ ...p, collectionIds: (p.collectionIds || [p.collectionId]).filter((c) => c && c !== id) })),
     });
     if (before?.image) forgetImages([before.image]);
     return ok();
@@ -302,11 +303,15 @@ export async function deleteCollection(id) {
 function buildCatalog(products, collections) {
   const byId = new Map(collections.map((c) => [c.id, c]));
   return products.map((p) => {
-    const col = p.collectionId ? byId.get(p.collectionId) : null;
+    // (a copy saved on this device before 17 Oct 2026 may still have a single collectionId)
+    const ids = p.collectionIds || (p.collectionId ? [p.collectionId] : []);
+    const cols = ids.map((id) => byId.get(id)).filter(Boolean);
     return {
       ...p,
-      collectionId: col ? col.id : null,
-      collection: col ? col.title : '', // the name shown on the site ('' = no collection)
+      collectionIds: cols.map((c) => c.id), // every collection it's in
+      collectionNames: cols.map((c) => c.title),
+      collectionId: cols[0]?.id || null, // the first one: used for the card name and breadcrumb
+      collection: cols[0]?.title || '', // the name shown on the site ('' = no collection)
       watch: WATCH_STYLES[p.watchStyle] || WATCH_STYLES.steelChrono, // drawing used until there are photos
     };
   });

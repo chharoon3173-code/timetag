@@ -50,7 +50,7 @@ export default function ProductPage({ id, wishlist }) {
   const related = useMemo(() => {
     if (!product) return [];
     const others = products.filter((p) => p.id !== product.id);
-    const same = (p) => !!product.collectionId && p.collectionId === product.collectionId;
+    const same = (p) => p.collectionIds.some((c) => product.collectionIds.includes(c)); // shares a collection
     return [...others.filter(same), ...others.filter((p) => !same(p))].slice(0, 4);
   }, [products, product]);
 
@@ -154,7 +154,12 @@ export default function ProductPage({ id, wishlist }) {
                 <details open>
                   <summary>Details</summary>
                   <dl className="pp-specs">
-                    {product.collection && <div><dt>Collection</dt><dd>{product.collection}</dd></div>}
+                    {product.collectionNames.length > 0 && (
+                      <div>
+                        <dt>{product.collectionNames.length > 1 ? 'Collections' : 'Collection'}</dt>
+                        <dd>{product.collectionNames.join(', ')}</dd>
+                      </div>
+                    )}
                     <div><dt>Strap</dt><dd>{product.strap || (product.watch.bracelet ? 'Steel bracelet' : 'Leather strap')}</dd></div>
                     {(product.specs || []).map(([k, v]) => (
                       <div key={k}><dt>{k}</dt><dd>{v}</dd></div>

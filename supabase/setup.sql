@@ -56,7 +56,8 @@ create unique index if not exists collections_title_unique on public.collections
 create table if not exists public.products (
   id            text primary key,                                -- e.g. 'verdant-gmt' (used in the page address)
   name          text not null check (length(trim(name)) between 1 and 120),
-  collection_id text references public.collections (id) on delete set null on update cascade,
+  collection_ids text[] not null default '{}',                    -- e.g. {rolex,automatic}: shown on each of these
+                                                                 -- collection pages; the first is the name on the card
   price         integer not null check (price > 0),              -- in rupees
   stock         integer not null default 0 check (stock >= 0),
   badge         text,                                            -- e.g. 'Best Seller'
@@ -70,7 +71,70 @@ create table if not exists public.products (
   rating        smallint not null default 5 check (rating between 1 and 5),
   created_at    timestamptz not null default now()
 );
-create index if not exists products_collection_idx on public.products (collection_id);
+
+-- Databases set up before 17 Oct 2026 had one collection per watch (collection_id): move it into the list.
+alter table public.products add column if not exists collection_ids text[] not null default '{}';
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'products' and column_name = 'collection_id') then
+    execute 'update public.products set collection_ids = array[collection_id]
+             where collection_id is not null and collection_ids = ''{}''';
+    alter table public.products drop column collection_id;
+  end if;
+end;
+$$;
+
+-- A watch can be in several collections. A list can't "reference" another table the way a single
+-- column can, so these two rules keep it tidy instead:
+-- (a) only existing collections can be added to a watch (and each only once);
+create or replace function public.check_product_collections()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.collection_ids := coalesce((
+    select array_agg(c order by first_pos)
+    from (select c, min(pos) as first_pos
+          from unnest(new.collection_ids) with ordinality as u(c, pos)
+          where c is not null and c <> ''
+          group by c) as t
+  ), '{}');
+  if exists (select 1 from unnest(new.collection_ids) as c
+             where not exists (select 1 from public.collections where id = c)) then
+    raise exception 'One of the chosen collections doesn''t exist any more. Refresh the page and try again.';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists products_check_collections on public.products;
+create trigger products_check_collections
+  before insert or update of collection_ids on public.products
+  for each row execute function public.check_product_collections();
+
+-- (b) deleting a collection takes it off every watch (the watches themselves are kept).
+create or replace function public.remove_collection_from_watches()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if tg_op = 'DELETE' then
+    update public.products set collection_ids = array_remove(collection_ids, old.id)
+    where old.id = any (collection_ids);
+    return old;
+  end if;
+  -- a collection's id changed: follow it
+  update public.products set collection_ids = array_replace(collection_ids, old.id, new.id)
+  where old.id = any (collection_ids);
+  return new;
+end;
+$$;
+drop trigger if exists collections_remove_from_watches on public.collections;
+create trigger collections_remove_from_watches
+  after delete or update of id on public.collections
+  for each row execute function public.remove_collection_from_watches();
 
 
 -- ---------- 4. Settings -----------------------------------------------------------------
@@ -236,7 +300,7 @@ begin
     v_items := v_items || jsonb_build_object(
       'id', v_product.id,
       'name', v_product.name,
-      'collection', coalesce((select title from public.collections where id = v_product.collection_id), ''),
+      'collection', coalesce((select title from public.collections where id = v_product.collection_ids[1]), ''),
       'price', v_product.price,
       'qty', v_qty
     );

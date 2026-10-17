@@ -14,7 +14,8 @@ export default function CollectionPage({ id, wishlist }) {
   const status = useCatalogStatus();
   const loadError = useCatalogError();
   const collection = collections.find((c) => c.id === id);
-  const watches = useMemo(() => products.filter((p) => p.collectionId === id), [products, id]);
+  // every watch ticked for this collection (a watch can be in several)
+  const watches = useMemo(() => products.filter((p) => p.collectionIds.includes(id)), [products, id]);
 
   useEffect(() => {
     if (collection) document.title = `${collection.title} — TimeTag`;

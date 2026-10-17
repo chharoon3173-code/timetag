@@ -20,8 +20,8 @@ export default function Collections({ catalog, onOpenInventory }) {
     toastTimer.current = setTimeout(() => setToast(''), 2200);
   };
 
-  const countIn = (id) => catalog.filter((p) => p.collectionId === id).length;
-  const uncategorized = catalog.filter((p) => !p.collectionId);
+  const countIn = (id) => catalog.filter((p) => p.collectionIds.includes(id)).length; // a watch can count in several
+  const uncategorized = catalog.filter((p) => p.collectionIds.length === 0);
   const picked = slots.filter(Boolean);
   const editingCollection = editing && editing !== 'new' ? collections.find((c) => c.id === editing) : null;
 
@@ -87,7 +87,7 @@ export default function Collections({ catalog, onOpenInventory }) {
         <div className="adm-alert" role="note">
           <strong>{uncategorized.length} watch{uncategorized.length > 1 ? 'es have' : ' has'} no collection:</strong>{' '}
           {uncategorized.map((p) => p.name).join(', ')}.{' '}
-          <button type="button" className="adm-linkbtn" onClick={onOpenInventory}>Choose one in Inventory → Edit</button>
+          <button type="button" className="adm-linkbtn" onClick={onOpenInventory}>Tick one in Inventory → Edit</button>
         </div>
       )}
 

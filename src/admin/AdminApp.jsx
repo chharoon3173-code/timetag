@@ -46,7 +46,7 @@ export default function AdminApp() {
 
   const pending = orders.filter((o) => o.status === 'pending').length;
   const low = catalog.filter((p) => p.stock <= LOW_STOCK).length;
-  const noCollection = catalog.filter((p) => !p.collectionId).length;
+  const noCollection = catalog.filter((p) => p.collectionIds.length === 0).length;
   const badges = { orders: pending, inventory: low, collections: noCollection };
   const problem = ordersError || catalogError;
 

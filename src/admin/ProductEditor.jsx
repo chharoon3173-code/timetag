@@ -15,7 +15,7 @@ const STYLE_OPTIONS = [
 
 const BLANK = {
   name: '',
-  collectionId: '', // chosen in the form (required)
+  collectionIds: [], // ticked in the form (at least one)
   price: '',
   stock: '',
   badge: '',
@@ -31,7 +31,7 @@ const BLANK = {
 function fromProduct(p) {
   return {
     name: p.name,
-    collectionId: p.collectionId || '',
+    collectionIds: p.collectionIds || [],
     price: String(p.price),
     stock: String(p.stock),
     badge: p.badge || '',
@@ -110,7 +110,7 @@ export default function ProductEditor({ product, onClose, onSaved }) {
   function validate() {
     const e = {};
     if (!f.name.trim()) e.name = 'Enter a name';
-    if (!collections.some((c) => c.id === f.collectionId)) e.collectionId = 'Choose a collection';
+    if (!collections.some((c) => f.collectionIds.includes(c.id))) e.collectionIds = 'Tick at least one collection';
     const price = Number(f.price);
     if (!f.price || !Number.isFinite(price) || price <= 0) e.price = 'Enter a price above 0';
     const stock = Number(f.stock);
@@ -130,7 +130,8 @@ export default function ProductEditor({ product, onClose, onSaved }) {
 
     const data = {
       name: f.name.trim(),
-      collectionId: f.collectionId,
+      // in your collection order, so the first one (shown on the card) is predictable
+      collectionIds: collections.filter((c) => f.collectionIds.includes(c.id)).map((c) => c.id),
       price: Math.round(Number(f.price)),
       stock: Number(f.stock),
       badge: f.badge.trim(),
@@ -253,20 +254,19 @@ export default function ProductEditor({ product, onClose, onSaved }) {
               {errors.stock && <em>{errors.stock}</em>}
             </label>
           </div>
-          <div className="adm-form__row">
-            <label className="adm-field">
-              <span>Collection *</span>
-              <select className={`adm-input${errors.collectionId ? ' is-error' : ''}`} value={f.collectionId} onChange={(e) => set('collectionId', e.target.value)}>
-                <option value="">Choose a collection…</option>
-                {collections.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-              </select>
-              {errors.collectionId && <em>{errors.collectionId}</em>}
-            </label>
-            <label className="adm-field">
-              <span>Label on card (optional)</span>
-              <input className="adm-input" value={f.badge} onChange={(e) => set('badge', e.target.value)} placeholder="e.g. Limited Edition" />
-            </label>
-          </div>
+          <fieldset className="adm-checks">
+            <legend>Collections * (tick every one it belongs to, e.g. Rolex and Automatic Watches)</legend>
+            {collections.map((c) => (
+              <label key={c.id}>
+                <input type="checkbox" checked={f.collectionIds.includes(c.id)} onChange={() => set('collectionIds', toggle(f.collectionIds, c.id))} /> {c.title}
+              </label>
+            ))}
+            {errors.collectionIds && <em>{errors.collectionIds}</em>}
+          </fieldset>
+          <label className="adm-field">
+            <span>Label on card (optional)</span>
+            <input className="adm-input" value={f.badge} onChange={(e) => set('badge', e.target.value)} placeholder="e.g. Limited Edition" />
+          </label>
           <label className="adm-field">
             <span>Short description *</span>
             <textarea className={`adm-input adm-textarea${errors.description ? ' is-error' : ''}`} rows={3} maxLength={220} value={f.description} onChange={(e) => set('description', e.target.value)} placeholder="One or two elegant sentences about the watch." />
