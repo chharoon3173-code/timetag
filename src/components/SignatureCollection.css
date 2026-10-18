@@ -123,7 +123,9 @@
 }
 .sig__thumb:focus-visible { outline: 1px solid #111111; outline-offset: 4px; }
 .sig__thumb > .watch-svg { width: 62%; pointer-events: none; }
-.sig__thumb > .product-photo { width: 120%; height: 120%; object-fit: cover; pointer-events: none; }
+/* photos fill the whole circle, edge to edge (drawings keep the padding around them) */
+.sig__thumb:has(> .product-photo) { padding: 0; }
+.sig__thumb > .product-photo { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
 /* while dragging, follow the finger exactly */
 .sig__dial.is-dragging .sig__bezel,
