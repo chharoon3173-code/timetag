@@ -135,11 +135,23 @@ export default function Watch({ style, className = '' }) {
   );
 }
 
-/** Shows the product's main photo if it has one, otherwise the vector watch. */
-export function ProductVisual({ product, className = '' }) {
+/**
+ * Shows the product's main photo if it has one, otherwise the vector watch.
+ * `hoverSwap`: also stack the second gallery photo on top (hidden); the card fades it in on hover
+ * (see "next photo on hover" in index.css).
+ */
+export function ProductVisual({ product, className = '', hoverSwap = false }) {
   const photo = product.images?.[0] || product.image;
+  const next = hoverSwap ? product.images?.[1] : null;
   if (photo) {
-    return <img className={`product-photo ${className}`} src={photo} alt={product.name} loading="lazy" decoding="async" />;
+    const main = <img className={`product-photo ${className}`} src={photo} alt={product.name} loading="lazy" decoding="async" />;
+    if (!next) return main;
+    return (
+      <>
+        {main}
+        <img className={`product-photo product-photo--next ${className}`} src={next} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      </>
+    );
   }
   return <Watch style={product.watch} className={className} />;
 }

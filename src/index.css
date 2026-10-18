@@ -390,6 +390,33 @@ a {
 .co-thumb { overflow: visible; }
 .co-thumb > .product-photo { border-radius: 7px; }
 
+/* ---------- Next photo on hover ----------
+   Watches with 2+ photos: the second photo sits on top of the first, invisible, and fades in
+   when the card is hovered (ProductVisual with `hoverSwap` in Watch.jsx). */
+.shop-card__visual > .product-photo.product-photo--next,
+.arrival__watch > .product-photo.product-photo--next {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 1s var(--ease);
+}
+.sig__center > .product-photo.product-photo--next {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  box-shadow: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+@media (hover: hover) {
+  .shop-card:hover .shop-card__visual > .product-photo.product-photo--next,
+  .arrival:hover .arrival__watch > .product-photo.product-photo--next,
+  .sig__center:hover > .product-photo.product-photo--next {
+    opacity: 1;
+  }
+}
+
 /* Thin gold scrollbars for the swipeable product rows */
 .collections,
 .arrivals {

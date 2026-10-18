@@ -262,7 +262,7 @@ export default function SignatureCollection({ products }) {
               key={product.id}
               aria-label={`View ${product.name}`}
             >
-              <ProductVisual product={product} />
+              <ProductVisual product={product} hoverSwap />
             </a>
           </div>
 

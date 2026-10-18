@@ -77,7 +77,7 @@ export default function TimeTagEdit({
                   <div className="shop-card__media">
                     {/* the photo is a second link to the same page, so it's hidden from screen readers */}
                     <a href={link} className="shop-card__visual" tabIndex={-1} aria-hidden="true">
-                      <ProductVisual product={p} />
+                      <ProductVisual product={p} hoverSwap />
                     </a>
                     {soldOut ? (
                       <span className="shop-card__tag shop-card__tag--muted">Sold out</span>

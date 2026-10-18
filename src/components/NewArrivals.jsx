@@ -32,7 +32,7 @@ export default function NewArrivals({
               <div className="arrival__visual">
                 {p.stock <= 0 ? <span className="arrival__tag arrival__tag--muted">Sold out</span> : tag && <span className="arrival__tag">{tag}</span>}
                 <HeartButton product={p} wishlist={wishlist} light size={16} />
-                <a href={href(`/product/${p.id}`)} className="arrival__watch" aria-label={p.name}><ProductVisual product={p} /></a>
+                <a href={href(`/product/${p.id}`)} className="arrival__watch" aria-label={p.name}><ProductVisual product={p} hoverSwap /></a>
               </div>
               <div className="arrival__meta">
                 <div>
