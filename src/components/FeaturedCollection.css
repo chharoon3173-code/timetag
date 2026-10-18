@@ -21,7 +21,7 @@
   mask-image: radial-gradient(closest-side, #000 78%, transparent 100%);
 }
 .feature__media:hover .feature__watch {
-  --zoom: 1.04;
+  --zoom: 1.08;
 }
 .feature__photo,
 .feature__hands {
@@ -43,7 +43,7 @@
   position: absolute;
   inset: 0;
   clip-path: circle(35.5% at 45.3% 46.7%);
-  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.42) 48%, rgba(255, 255, 255, 0.1) 54%, transparent 62%);
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.6) 48%, rgba(255, 255, 255, 0.16) 54%, transparent 62%);
   background-size: 260% 260%;
   background-position: var(--glare-x, 30%) var(--glare-y, 30%);
   mix-blend-mode: screen;

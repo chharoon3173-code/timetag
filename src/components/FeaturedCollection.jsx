@@ -78,8 +78,8 @@ export default function FeaturedCollection() {
     const gx = Math.min(1, Math.max(0, (e.clientX - w.left) / w.width));
     const gy = Math.min(1, Math.max(0, (e.clientY - w.top) / w.height));
     const s = media.current.style;
-    s.setProperty('--tilt-x', `${(-py * 10).toFixed(2)}deg`);
-    s.setProperty('--tilt-y', `${(px * 12).toFixed(2)}deg`);
+    s.setProperty('--tilt-x', `${(-py * 18).toFixed(2)}deg`); // up to 9° up/down
+    s.setProperty('--tilt-y', `${(px * 24).toFixed(2)}deg`); // up to 12° left/right
     s.setProperty('--glare-x', `${(gx * 100).toFixed(1)}%`);
     s.setProperty('--glare-y', `${(gy * 100).toFixed(1)}%`);
   };
