@@ -8,9 +8,11 @@ import './FeaturedCollection.css';
  * Hovering with a mouse tilts it gently towards the pointer, with light glinting across the glass.
  *
  * Moving hands (Pakistan time): the photo must be a version with its own hands removed.
- * When brand/feature-watch.jpg is that retouched photo, set PHOTO_HAS_NO_HANDS to true.
+ * The current file is an automatic retouch (small flaws in the dial writing up close); a designer's
+ * cleaner hand-free version can simply replace brand/feature-watch.jpg (same size and framing).
+ * With a photo that still has its printed hands, set PHOTO_HAS_NO_HANDS to false.
  */
-const PHOTO_HAS_NO_HANDS = false;
+const PHOTO_HAS_NO_HANDS = true;
 
 // Measured on the photo (1254 × 1254 pixels): where the hands turn, and how far the dial is turned.
 const PIVOT = { x: 569, y: 581 };
@@ -27,29 +29,29 @@ function PhotoHands() {
     <svg className="feature__hands" viewBox="0 0 1254 1254" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id="fh-steel" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#23262a" />
-          <stop offset="0.5" stopColor="#a7adb3" />
-          <stop offset="1" stopColor="#23262a" />
+          <stop offset="0" stopColor="#16181b" />
+          <stop offset="0.5" stopColor="#8d939a" />
+          <stop offset="1" stopColor="#16181b" />
         </linearGradient>
         <radialGradient id="fh-cap" cx="0.4" cy="0.35" r="0.7">
           <stop offset="0" stopColor="#f4f5f6" />
           <stop offset="0.55" stopColor="#9aa0a6" />
           <stop offset="1" stopColor="#3b3f44" />
         </radialGradient>
-        {/* soft shadow down and to the left, like the light in the photo */}
+        {/* soft shadow up and to the right, like the light in the photo */}
         <filter id="fh-shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="-6" dy="7" stdDeviation="4" floodColor="#0b2233" floodOpacity="0.38" />
+          <feDropShadow dx="6" dy="-6" stdDeviation="5" floodColor="#0b2233" floodOpacity="0.4" />
         </filter>
       </defs>
       <g transform={`rotate(${DIAL_TURN} ${x} ${y})`} filter="url(#fh-shadow)">
         <g key={start}>
           <g className="feature__hand" style={handVars(start, 43200)}>
-            <path d={baton(240, 70, 26)} fill="url(#fh-steel)" />
-            <rect x={x - 6} y={y - 222} width="12" height="182" rx="3" fill="#f6f6f2" />
+            <path d={baton(240, 70, 30)} fill="url(#fh-steel)" />
+            <rect x={x - 7} y={y - 220} width="14" height="182" rx="3" fill="#f6f6f2" />
           </g>
           <g className="feature__hand" style={handVars(start, 3600)}>
-            <path d={baton(372, 70, 22)} fill="url(#fh-steel)" />
-            <rect x={x - 5} y={y - 356} width="10" height="314" rx="3" fill="#f6f6f2" />
+            <path d={baton(372, 70, 26)} fill="url(#fh-steel)" />
+            <rect x={x - 6} y={y - 352} width="12" height="310" rx="3" fill="#f6f6f2" />
           </g>
           <g className="feature__hand" style={handVars(start, 60)}>
             <rect x={x - 2} y={y - 300} width="4" height="430" fill="#15171a" />
@@ -57,8 +59,8 @@ function PhotoHands() {
             <rect x={x - 5} y={y + 108} width="10" height="26" rx="3" fill="#15171a" />
           </g>
         </g>
-        <circle cx={x} cy={y} r="22" fill="url(#fh-cap)" />
-        <circle cx={x} cy={y} r="7" fill="#5c6167" />
+        <circle cx={x} cy={y} r="28" fill="url(#fh-cap)" />
+        <circle cx={x} cy={y} r="9" fill="#5c6167" />
       </g>
     </svg>
   );
